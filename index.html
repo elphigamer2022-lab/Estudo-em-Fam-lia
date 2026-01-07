@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Painel de Jogos - 100 Emojis v42</title>
+    <title>Painel de Jogos - 100 Emojis v43 Global</title>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <style>
         body { font-family: sans-serif; background-color: #1a1a2e; color: #fff; margin: 0; display: flex; justify-content: center; padding: 10px; }
@@ -39,7 +39,6 @@
     </style>
 </head>
 <body>
-
     <div id="login-screen">
         <h1>🎲 Game dos Correia</h1>
         <input type="text" id="username" placeholder="SEU NOME">
@@ -120,25 +119,46 @@
     </div>
 
     <script>
-        // Configurações Globais
-        const DB_VERSION = 'v42_global';
+        // CONFIGURAÇÕES DO BANCO GLOBAL (JSONBin)
+        const BIN_ID = '695dbb1a43b1c97be91e392b'; 
+        const API_KEY = '$2a$10$TFRelzQbssgoIdAi7ynyTeMqqatmKYCyEtwHBiIhqvK2Vn0A3OvNS';
+        const URL = `https://api.jsonbin.io/v3/b/${695dbb1a43b1c97be91e392b}`;
+
+        const DB_VERSION = 'v43_global';
         let users = [], bannedUsers = [], currentUser = null, spyTarget = null;
-        let peer = null, localStream = null;
+        let peer = null, localStream = null, chatGlobal = [];
 
         const emojis = ['😀','😃','😄','😁','😆','😅','😂','🤣','😊','😇','🙂','🙃','😉','😌','😍','🥰','😘','😗','😙','😚','😋','😛','😝','😜','🤪','🤨','🧐','🤓','😎','🤩','🥳','😏','😒','😞','😔','😟','😕','🙁','☹️','😣','😖','😫','😩','🥺','😢','😭','😤','😠','😡','🤬','🤯','😳','🥵','🥶','😱','😨','😰','😥','😓','🤗','🤔','🤭','🤫','🤥','😶','😐','😑','😬','🙄','😯','😦','😧','😮','😲','🥱','😴','🤤','😪','😵','🤐','🥴','🤢','🤮','🤧','😷','🤒','🤕','🤑','🤠','😈','👿','👹','👺','🤡','👻','💀','☠️','👽','👾','🤖','🎃'];
 
         function toggleEmojiPicker() { document.getElementById('emoji-picker').classList.toggle('hidden'); }
         function addEmoji(e) { document.getElementById('chat-input').value += e; }
 
-        // Módulo de Persistência (Preparado para Netlify Functions/Supabase)
-        function save() { 
-            localStorage.setItem(`users_${DB_VERSION}`, JSON.stringify(users)); 
-            localStorage.setItem(`banned_${DB_VERSION}`, JSON.stringify(bannedUsers));
+        async function save() { 
+            try {
+                await fetch(URL, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json', 'X-Master-Key': API_KEY },
+                    body: JSON.stringify({ users, bannedUsers, chat: chatGlobal })
+                });
+            } catch (e) { console.error("Erro ao salvar nuvem:", e); }
         }
 
-        function loadLocal() {
-            users = JSON.parse(localStorage.getItem(`users_${DB_VERSION}`)) || [];
-            bannedUsers = JSON.parse(localStorage.getItem(`banned_${DB_VERSION}`)) || [];
+        async function syncData() {
+            const loggedName = sessionStorage.getItem('loggedUser');
+            if (!loggedName) return;
+            try {
+                const response = await fetch(URL, { headers: { 'X-Master-Key': API_KEY } });
+                const remote = await response.json();
+                const data = remote.record;
+                if (data.users) {
+                    users = data.users;
+                    bannedUsers = data.bannedUsers || [];
+                    chatGlobal = data.chat || [];
+                    const updatedMe = users.find(u => u.username === loggedName);
+                    if (updatedMe) currentUser = updatedMe;
+                    updateUI(chatGlobal);
+                }
+            } catch (e) { console.error("Erro na sincronização"); }
         }
 
         function login() {
@@ -146,36 +166,30 @@
             if (!name) return;
             if (name !== "Samuel Correia") name = name.toUpperCase();
             
-            loadLocal();
-            
-            if (bannedUsers.includes(name)) return alert("Banido!");
-            
-            let user = users.find(u => u.username === name);
-            if (!user) {
-                user = { username: name, score: 0, coins: 50, inventory: [], shieldCharges: 0, online: true, isRobbing: false };
-                users.push(user);
-            } else {
-                user.online = true;
-            }
-            
-            currentUser = user; 
-            sessionStorage.setItem('loggedUser', name);
-            
-            initPeer(name);
-            
-            const picker = document.getElementById('emoji-picker');
-            picker.innerHTML = emojis.map(e => `<span class="emoji-item" onclick="addEmoji('${e}')">${e}</span>`).join('');
-            
-            save();
-            document.getElementById('login-screen').classList.add('hidden');
-            document.getElementById('dashboard').classList.remove('hidden');
-            if (name === "Samuel Correia") document.getElementById('host-panel').classList.remove('hidden');
+            syncData().then(() => {
+                if (bannedUsers.includes(name)) return alert("Banido!");
+                let user = users.find(u => u.username === name);
+                if (!user) {
+                    user = { username: name, score: 0, coins: 50, inventory: [], shieldCharges: 0, online: true, isRobbing: false };
+                    users.push(user);
+                } else {
+                    user.online = true;
+                }
+                currentUser = user; 
+                sessionStorage.setItem('loggedUser', name);
+                initPeer(name);
+                const picker = document.getElementById('emoji-picker');
+                picker.innerHTML = emojis.map(e => `<span class="emoji-item" onclick="addEmoji('${e}')">${e}</span>`).join('');
+                save();
+                document.getElementById('login-screen').classList.add('hidden');
+                document.getElementById('dashboard').classList.remove('hidden');
+                if (name === "Samuel Correia") document.getElementById('host-panel').classList.remove('hidden');
+            });
         }
 
         function initPeer(n) { 
             const pId = n.replace(/\s+/g, '-') + "-Peer";
             peer = new Peer(pId, { config: {'iceServers': [{ url: 'stun:stun.l.google.com:19302' }]} }); 
-
             peer.on('call', (c) => { 
                 navigator.mediaDevices.getUserMedia({video:true, audio:true}).then((s) => { 
                     c.answer(s); 
@@ -223,19 +237,6 @@
             save(); syncData();
         }
 
-        function syncData() {
-            const loggedName = sessionStorage.getItem('loggedUser');
-            if (!loggedName) return;
-            
-            loadLocal();
-            
-            const updatedMe = users.find(u => u.username === loggedName);
-            if (updatedMe) currentUser = updatedMe;
-            
-            const chat = JSON.parse(localStorage.getItem(`chat_${DB_VERSION}`)) || [];
-            updateUI(chat);
-        }
-
         function updateUI(chat) {
             const displayData = (spyTarget) ? users.find(u => u.username === spyTarget.username) : currentUser;
             if (!displayData) return;
@@ -265,10 +266,8 @@
         }
 
         function deletarMsg(index) {
-            let chat = JSON.parse(localStorage.getItem(`chat_${DB_VERSION}`)) || [];
-            chat.splice(index, 1);
-            localStorage.setItem(`chat_${DB_VERSION}`, JSON.stringify(chat));
-            syncData();
+            chatGlobal.splice(index, 1);
+            save(); syncData();
         }
 
         function buy(p, t) { 
@@ -308,14 +307,12 @@
         function enviarMsg() {
             let sender = spyTarget ? spyTarget : currentUser;
             const i = document.getElementById('chat-input'); if(!i.value.trim()) return;
-            const c = JSON.parse(localStorage.getItem(`chat_${DB_VERSION}`)) || [];
-            c.push({id:sender.username, msg:i.value}); if(c.length>15) c.shift();
-            localStorage.setItem(`chat_${DB_VERSION}`, JSON.stringify(c));
+            chatGlobal.push({id:sender.username, msg:i.value}); if(chatGlobal.length>15) chatGlobal.shift();
             i.value = ""; document.getElementById('emoji-picker').classList.add('hidden');
             save();
         }
 
-        function logout() { if(currentUser) currentUser.online = false; spyTarget = null; save(); sessionStorage.removeItem('loggedUser'); location.reload(); }
+        function logout() { if(currentUser) currentUser.online = false; spyTarget = null; save().then(() => { sessionStorage.removeItem('loggedUser'); location.reload(); }); }
         function resetarPontosGeral() { if(confirm("Zerar ranking?")) { users.forEach(u => u.score = 0); save(); } }
         function desbanir(n) { bannedUsers = bannedUsers.filter(x => x !== n); save(); }
         

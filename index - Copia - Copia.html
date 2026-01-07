@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel de Jogos - 100 Emojis v42</title>
+    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+    <style>
+        body { font-family: sans-serif; background-color: #1a1a2e; color: #fff; margin: 0; display: flex; justify-content: center; padding: 10px; }
+        .hidden { display: none !important; }
+        #login-screen { text-align: center; margin-top: 10vh; padding: 30px; background: #16213e; border-radius: 15px; width: 320px; border: 1px solid #e94560; }
+        input { padding: 12px; border-radius: 5px; border: none; width: 90%; margin-bottom: 15px; font-size: 16px; background: #fff; color: #000; }
+        button { padding: 10px 15px; background-color: #e94560; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; margin: 5px; }
+        #dashboard { width: 100%; max-width: 1100px; }
+        header { display: flex; justify-content: space-between; align-items: center; background: #16213e; padding: 20px; border-radius: 15px; margin-bottom: 20px; border-bottom: 4px solid #e94560; }
+        .container { display: grid; grid-template-columns: 1fr 1.5fr; gap: 20px; }
+        @media (max-width: 800px) { .container { grid-template-columns: 1fr; } }
+        .card { background: #0f3460; padding: 15px; border-radius: 12px; margin-bottom: 20px; }
+        h3 { margin: 0 0 10px 0; color: #e94560; text-transform: uppercase; font-size: 0.85em; border-bottom: 1px solid #1a1a2e; padding-bottom: 5px; }
+        .rank-item { padding: 8px; margin-bottom: 6px; background: #16213e; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; font-size: 0.9em; }
+        .host-clickable { cursor: pointer; border: 1px dashed #ff4d6d; }
+        #video-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; background: #000; padding: 10px; border-radius: 12px; margin-top: 10px; }
+        .video-box { position: relative; background: #222; border-radius: 8px; overflow: hidden; min-height: 140px; }
+        .video-label { position: absolute; bottom: 5px; left: 5px; background: rgba(0,0,0,0.6); padding: 2px 6px; font-size: 10px; border-radius: 4px; z-index: 5; }
+        video { width: 100%; height: 100%; object-fit: cover; }
+        #localVideo { transform: scaleX(-1); }
+        .status-dot { height: 8px; width: 8px; border-radius: 50%; display: inline-block; margin-right: 8px; }
+        .online-dot { background-color: #4ecca3; box-shadow: 0 0 5px #4ecca3; }
+        .offline-dot { background-color: #777; }
+        .item-card { background: #1a1a2e; padding: 10px; text-align: center; border-radius: 10px; border: 1px solid #333; cursor: pointer; }
+        .chat-box { height: 150px; overflow-y: auto; background: #16213e; padding: 10px; border-radius: 8px; margin-bottom: 10px; font-size: 0.8em; }
+        .chat-input-area { display: flex; gap: 5px; position: relative; }
+        .chat-msg { position: relative; padding: 2px 0; display: flex; justify-content: space-between; align-items: center; }
+        .delete-btn { cursor: pointer; opacity: 0; transition: 0.2s; font-size: 12px; margin-left: 10px; }
+        .chat-msg:hover .delete-btn { opacity: 1; }
+        #emoji-picker { position: absolute; bottom: 45px; right: 0; background: #1f2d52; border: 1px solid #e94560; border-radius: 8px; padding: 10px; display: grid; grid-template-columns: repeat(10, 1fr); gap: 5px; z-index: 100; max-height: 200px; overflow-y: auto; width: 250px; }
+        .emoji-item { cursor: pointer; font-size: 18px; text-align: center; }
+        .spy-alert { background: #ff4d6d; color: white; padding: 5px; text-align: center; font-size: 0.7em; border-radius: 5px; margin-bottom: 10px; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <div id="login-screen">
+        <h1>🎲 Game dos Correia</h1>
+        <input type="text" id="username" placeholder="SEU NOME">
+        <button onclick="login()">ENTRAR</button>
+    </div>
+
+    <div id="dashboard" class="hidden">
+        <div id="spy-indicator" class="spy-alert hidden">MODO ESPIÃO/INVASÃO ATIVO</div>
+        <header>
+            <div>
+                <h2 id="user-display">---</h2>
+                <div id="shield-status" style="color: #4ecca3; font-size: 0.8em; font-weight: bold;"></div>
+            </div>
+            <div style="text-align: right">
+                <div>🏆 <span id="my-score">0</span> pts</div>
+                <div style="color: #ffd700;">💰 <span id="my-coins">0</span></div>
+            </div>
+            <button onclick="logout()" style="background:#333">Sair</button>
+        </header>
+
+        <div class="container">
+            <div class="column">
+                <section class="card">
+                    <h3>🟢 Online Agora</h3>
+                    <div id="online-list"></div>
+                    <hr style="border: 0; border-top: 1px solid #16213e; margin: 15px 0;">
+                    <h3>⚪ Offline</h3>
+                    <div id="offline-list"></div>
+                </section>
+                
+                <section class="card">
+                    <h3>📹 Vídeo Chamada</h3>
+                    <button onclick="initCamera()" style="width:100%; background:#4a90e2">🎥 ATIVAR MINHA CÂMERA</button>
+                    <div id="video-grid" class="hidden">
+                        <div class="video-box"><span class="video-label">Você</span><video id="localVideo" autoplay muted playsinline></video></div>
+                    </div>
+                </section>
+
+                <section id="host-panel" class="card hidden" style="border: 2px solid #ff4d6d;">
+                    <h3>⚙️ Host: Ações Globais</h3>
+                    <button onclick="resetarPontosGeral()" style="width:100%; background: #ff4d6d; margin-bottom:15px;">🔄 ZERAR PONTOS DE TODOS</button>
+                    <h3 style="border-bottom: 1px solid #ff4d6d; color:#ff4d6d;">🚫 Lista de Banidos</h3>
+                    <div id="banned-list"></div>
+                </section>
+            </div>
+
+            <div class="column">
+                <section class="card">
+                    <h3>🛒 Loja de Itens</h3>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 5px;">
+                        <button onclick="buy(100, 'Escudo')">🛡️ Escudo (100💰)</button>
+                        <button onclick="buy(500, 'Roubo')">💸 Roubo (500💰)</button>
+                        <button onclick="buy(800, 'Invasão')" style="background:#6a0572">🕵️ Invasão (800💰)</button>
+                        <button onclick="buy(1000, 'Redemoinho')" style="background:#2d4059">🌪️ Redemoinho (1000💰)</button>
+                        <button onclick="buy(600, 'Bomba')" style="background:#bf0603">💣 Bomba (600💰)</button>
+                    </div>
+                </section>
+                <section class="card">
+                    <h3>🎒 Meu Inventário</h3>
+                    <div id="inventory-list" style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;"></div>
+                </section>
+                <section class="card">
+                    <h3>🎮 Jogo</h3>
+                    <button id="btn-ganhei" style="width:100%; height: 40px; background:#4ecca3; color:#000" onclick="ganheiRodada()">⭐ GANHEI RODADA</button>
+                </section>
+                <section class="card">
+                    <h3>💬 Chat</h3>
+                    <div id="chat-box" class="chat-box"></div>
+                    <div class="chat-input-area">
+                        <input type="text" id="chat-input" placeholder="Mensagem..." onkeypress="if(event.key==='Enter') enviarMsg()" style="flex:1; padding:5px; margin:0;">
+                        <button onclick="toggleEmojiPicker()" style="padding: 5px;">😀</button>
+                        <button onclick="enviarMsg()">></button>
+                        <div id="emoji-picker" class="hidden"></div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configurações Globais
+        const DB_VERSION = 'v42_global';
+        let users = [], bannedUsers = [], currentUser = null, spyTarget = null;
+        let peer = null, localStream = null;
+
+        const emojis = ['😀','😃','😄','😁','😆','😅','😂','🤣','😊','😇','🙂','🙃','😉','😌','😍','🥰','😘','😗','😙','😚','😋','😛','😝','😜','🤪','🤨','🧐','🤓','😎','🤩','🥳','😏','😒','😞','😔','😟','😕','🙁','☹️','😣','😖','😫','😩','🥺','😢','😭','😤','😠','😡','🤬','🤯','😳','🥵','🥶','😱','😨','😰','😥','😓','🤗','🤔','🤭','🤫','🤥','😶','😐','😑','😬','🙄','😯','😦','😧','😮','😲','🥱','😴','🤤','😪','😵','🤐','🥴','🤢','🤮','🤧','😷','🤒','🤕','🤑','🤠','😈','👿','👹','👺','🤡','👻','💀','☠️','👽','👾','🤖','🎃'];
+
+        function toggleEmojiPicker() { document.getElementById('emoji-picker').classList.toggle('hidden'); }
+        function addEmoji(e) { document.getElementById('chat-input').value += e; }
+
+        // Módulo de Persistência (Preparado para Netlify Functions/Supabase)
+        function save() { 
+            localStorage.setItem(`users_${DB_VERSION}`, JSON.stringify(users)); 
+            localStorage.setItem(`banned_${DB_VERSION}`, JSON.stringify(bannedUsers));
+        }
+
+        function loadLocal() {
+            users = JSON.parse(localStorage.getItem(`users_${DB_VERSION}`)) || [];
+            bannedUsers = JSON.parse(localStorage.getItem(`banned_${DB_VERSION}`)) || [];
+        }
+
+        function login() {
+            let name = document.getElementById('username').value.trim();
+            if (!name) return;
+            if (name !== "Samuel Correia") name = name.toUpperCase();
+            
+            loadLocal();
+            
+            if (bannedUsers.includes(name)) return alert("Banido!");
+            
+            let user = users.find(u => u.username === name);
+            if (!user) {
+                user = { username: name, score: 0, coins: 50, inventory: [], shieldCharges: 0, online: true, isRobbing: false };
+                users.push(user);
+            } else {
+                user.online = true;
+            }
+            
+            currentUser = user; 
+            sessionStorage.setItem('loggedUser', name);
+            
+            initPeer(name);
+            
+            const picker = document.getElementById('emoji-picker');
+            picker.innerHTML = emojis.map(e => `<span class="emoji-item" onclick="addEmoji('${e}')">${e}</span>`).join('');
+            
+            save();
+            document.getElementById('login-screen').classList.add('hidden');
+            document.getElementById('dashboard').classList.remove('hidden');
+            if (name === "Samuel Correia") document.getElementById('host-panel').classList.remove('hidden');
+        }
+
+        function initPeer(n) { 
+            const pId = n.replace(/\s+/g, '-') + "-Peer";
+            peer = new Peer(pId, { config: {'iceServers': [{ url: 'stun:stun.l.google.com:19302' }]} }); 
+
+            peer.on('call', (c) => { 
+                navigator.mediaDevices.getUserMedia({video:true, audio:true}).then((s) => { 
+                    c.answer(s); 
+                    addRemoteStream(c.peer.replace('-Peer',''), s); 
+                }); 
+            }); 
+        }
+
+        async function initCamera() { 
+            try { 
+                localStream = await navigator.mediaDevices.getUserMedia({video:true, audio:true}); 
+                document.getElementById('localVideo').srcObject = localStream; 
+                document.getElementById('video-grid').classList.remove('hidden'); 
+            } catch(e) { alert("Câmera OFF"); } 
+        }
+
+        function ligarPara(id) { 
+            if(!localStream) return alert("Ative sua câmera!"); 
+            const c = peer.call(id, localStream); 
+            c.on('stream', (s) => addRemoteStream(id.replace('-Peer',''), s)); 
+        }
+
+        function addRemoteStream(n, s) { 
+            if(document.getElementById("video-"+n)) return; 
+            const b = document.createElement('div'); 
+            b.className = "video-box"; 
+            b.id = "video-"+n; 
+            b.innerHTML = `<span class="video-label">${n}</span><video id="vid-el-${n}" autoplay playsinline muted></video>`; 
+            document.getElementById('video-grid').appendChild(b); 
+            const v = document.getElementById(`vid-el-${n}`);
+            v.srcObject = s;
+            v.play().catch(() => {});
+        }
+
+        window.gerenciarJogador = function(target) {
+            if (sessionStorage.getItem('loggedUser') !== "Samuel Correia") return;
+            const u = users.find(x => x.username === target);
+            if (spyTarget && (target === spyTarget.username)) { spyTarget = null; document.getElementById('spy-indicator').classList.add('hidden'); return; }
+            const op = prompt(`Host: ${target}\n1-Add Pts, 2-Rem Pts, 3-Ban, 4-Moedas, 5-ESPIAR`);
+            if (op === "1") u.score += parseInt(prompt("Valor:"));
+            else if (op === "2") u.score = Math.max(0, u.score - parseInt(prompt("Valor:")));
+            else if (op === "3" && confirm("Ban?")) { bannedUsers.push(target); users = users.filter(x => x.username !== target); }
+            else if (op === "4") u.coins = parseInt(prompt("Saldo:"));
+            else if (op === "5") { spyTarget = u; document.getElementById('spy-indicator').classList.remove('hidden'); }
+            save(); syncData();
+        }
+
+        function syncData() {
+            const loggedName = sessionStorage.getItem('loggedUser');
+            if (!loggedName) return;
+            
+            loadLocal();
+            
+            const updatedMe = users.find(u => u.username === loggedName);
+            if (updatedMe) currentUser = updatedMe;
+            
+            const chat = JSON.parse(localStorage.getItem(`chat_${DB_VERSION}`)) || [];
+            updateUI(chat);
+        }
+
+        function updateUI(chat) {
+            const displayData = (spyTarget) ? users.find(u => u.username === spyTarget.username) : currentUser;
+            if (!displayData) return;
+            document.getElementById('user-display').innerText = displayData.username + (spyTarget ? " (MODO INVASÃO)" : "");
+            document.getElementById('my-score').innerText = displayData.score;
+            document.getElementById('my-coins').innerText = displayData.coins;
+            document.getElementById('shield-status').innerText = displayData.shieldCharges > 0 ? `🛡️ PROTEÇÃO: ${displayData.shieldCharges} CARGAS` : "";
+            
+            const isH = sessionStorage.getItem('loggedUser') === "Samuel Correia";
+            const sorted = [...users].sort((a,b) => b.score - a.score);
+            
+            const render = (u) => {
+                const pId = u.username.replace(/\s+/g, '-') + "-Peer";
+                return `<div class="rank-item ${isH?'host-clickable':''}" onclick="${isH?`gerenciarJogador('${u.username}')`:''}">
+                    <span><span class="status-dot ${u.online?'online-dot':'offline-dot'}"></span>${u.username} ${u.shieldCharges>0?'🛡️':''}</span>
+                    <div>
+                        ${(u.online && u.username !== currentUser.username) ? `<button onclick="event.stopPropagation(); ligarPara('${pId}')" style="font-size:9px; background:#4ecca3; color:#000">📞</button>` : ''}
+                        <span>${u.score} pts</span>
+                    </div>
+                </div>`;
+            };
+            
+            document.getElementById('online-list').innerHTML = sorted.filter(u=>u.online).map(render).join('');
+            document.getElementById('offline-list').innerHTML = sorted.filter(u=>!u.online).map(render).join('');
+            document.getElementById('chat-box').innerHTML = chat.map((m, index) => `<div class="chat-msg"><span><b>${m.id}:</b> ${m.msg}</span>${m.id === currentUser.username ? `<span class="delete-btn" onclick="deletarMsg(${index})">🗑️</span>` : ''}</div>`).join('');
+            document.getElementById('inventory-list').innerHTML = displayData.inventory.map((item, i) => `<div class="item-card" onclick="usarItem(${i})"><b>${item}</b></div>`).join('') || "<small>Vazio</small>";
+        }
+
+        function deletarMsg(index) {
+            let chat = JSON.parse(localStorage.getItem(`chat_${DB_VERSION}`)) || [];
+            chat.splice(index, 1);
+            localStorage.setItem(`chat_${DB_VERSION}`, JSON.stringify(chat));
+            syncData();
+        }
+
+        function buy(p, t) { 
+            let buyer = spyTarget ? spyTarget : currentUser;
+            if(buyer.coins >= p) { buyer.coins -= p; buyer.inventory.push(t); save(); } else alert("Sem moedas"); 
+        }
+
+        function usarItem(i) {
+            let activeUser = spyTarget ? spyTarget : currentUser;
+            const item = activeUser.inventory[i];
+            if (item === "Escudo") activeUser.shieldCharges += 3;
+            else if (item === "Roubo") {
+                activeUser.isRobbing = true;
+                users.forEach(u => { if(u.username !== activeUser.username) { u.coins = Math.max(0, u.coins - 10); activeUser.coins += 10; }});
+                setTimeout(() => { activeUser.isRobbing = false; save(); }, 5000);
+            }
+            else if (item === "Invasão") {
+                const alvo = prompt("Nome do jogador para invadir:");
+                const userAlvo = users.find(u => u.username === (alvo||"").toUpperCase() || u.username === alvo);
+                if (userAlvo && userAlvo.username !== currentUser.username) {
+                    spyTarget = userAlvo;
+                    document.getElementById('spy-indicator').classList.remove('hidden');
+                }
+            }
+            activeUser.inventory.splice(i, 1);
+            save();
+        }
+
+        function ganheiRodada() {
+            let player = spyTarget ? spyTarget : currentUser;
+            const old = player.score; player.score += 10; player.coins += 5;
+            if(Math.floor(player.score/100)>Math.floor(old/100)) player.coins += 50;
+            users.forEach(u => { if(u.username !== player.username) { if(u.shieldCharges > 0) u.shieldCharges--; else u.score = Math.max(0, u.score - 15); } });
+            save();
+        }
+
+        function enviarMsg() {
+            let sender = spyTarget ? spyTarget : currentUser;
+            const i = document.getElementById('chat-input'); if(!i.value.trim()) return;
+            const c = JSON.parse(localStorage.getItem(`chat_${DB_VERSION}`)) || [];
+            c.push({id:sender.username, msg:i.value}); if(c.length>15) c.shift();
+            localStorage.setItem(`chat_${DB_VERSION}`, JSON.stringify(c));
+            i.value = ""; document.getElementById('emoji-picker').classList.add('hidden');
+            save();
+        }
+
+        function logout() { if(currentUser) currentUser.online = false; spyTarget = null; save(); sessionStorage.removeItem('loggedUser'); location.reload(); }
+        function resetarPontosGeral() { if(confirm("Zerar ranking?")) { users.forEach(u => u.score = 0); save(); } }
+        function desbanir(n) { bannedUsers = bannedUsers.filter(x => x !== n); save(); }
+        
+        setInterval(syncData, 2000);
+    </script>
+</body>
+</html>

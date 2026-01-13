@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Game dos Correia - Estável</title>
+    <title>Game dos Correia - Host Edition</title>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <style>
         body { font-family: sans-serif; background-color: #1a1a2e; color: #fff; margin: 0; padding: 10px; display: flex; justify-content: center; }
         .hidden { display: none !important; }
         #login-screen { text-align: center; margin-top: 10vh; padding: 30px; background: #16213e; border-radius: 15px; width: 320px; border: 1px solid #e94560; }
-        input { padding: 12px; border-radius: 5px; border: none; width: 90%; margin-bottom: 15px; font-size: 16px; }
+        input { padding: 12px; border-radius: 5px; border: none; width: 90%; margin-bottom: 15px; font-size: 16px; color: #000; }
         button { padding: 10px 15px; background-color: #e94560; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
         #dashboard { width: 100%; max-width: 1100px; }
         header { display: flex; justify-content: space-between; align-items: center; background: #16213e; padding: 20px; border-radius: 15px; margin-bottom: 20px; border-bottom: 4px solid #e94560; }
@@ -29,7 +29,7 @@
 
     <div id="login-screen">
         <h1>🎲 Game dos Correia</h1>
-        <input type="text" id="username" placeholder="Teu Nome">
+        <input type="text" id="username" placeholder="Seu Nome">
         <button onclick="login()">ENTRAR</button>
     </div>
 
@@ -37,18 +37,24 @@
         <header>
             <h2 id="user-display">---</h2>
             <div>🏆 <span id="my-score">0</span> | 💰 <span id="my-coins">0</span></div>
-            <button onclick="logout()">Sair</button>
+            <button onclick="logout()" style="background:#333">Sair</button>
         </header>
 
         <div class="container">
             <div class="column">
                 <section class="card">
                     <h3>🟢 Online</h3>
-                    <div id="online-list">A carregar...</div>
+                    <div id="online-list"></div>
                     <hr style="border:0; border-top:1px solid #16213e; margin:10px 0;">
                     <h3>⚪ Offline</h3>
                     <div id="offline-list"></div>
                 </section>
+
+                <section id="host-panel" class="card hidden" style="border: 2px solid #ff4d6d;">
+                    <h3 style="color:#ff4d6d">⚙️ Painel do Host</h3>
+                    <button onclick="resetarTudo()" style="width:100%; background:#ff4d6d">🔄 ZERAR RANKING GERAL</button>
+                </section>
+                
                 <section class="card">
                     <h3>📹 Vídeo</h3>
                     <button onclick="initCamera()" style="width:100%; background:#4a90e2; margin-bottom:10px;">🎥 Ligar Câmera</button>
@@ -59,6 +65,7 @@
                     </div>
                 </section>
             </div>
+
             <div class="column">
                 <section class="card">
                     <h3>🎮 Jogo</h3>
@@ -66,9 +73,11 @@
                 </section>
                 <section class="card">
                     <h3>💬 Chat</h3>
-                    <div id="chat-box" style="height:100px; overflow-y:auto; font-size:0.9em; margin-bottom:10px;"></div>
-                    <input type="text" id="chat-input" placeholder="Mensagem..." onkeypress="if(event.key==='Enter') enviarMsg()" style="width:70%;">
-                    <button onclick="enviarMsg()">Enviar</button>
+                    <div id="chat-box" style="height:150px; overflow-y:auto; font-size:0.9em; margin-bottom:10px; background: #16213e; padding: 5px; border-radius: 5px;"></div>
+                    <div style="display:flex; gap:5px;">
+                        <input type="text" id="chat-input" placeholder="Mensagem..." style="flex:1;">
+                        <button onclick="enviarMsg()">Enviar</button>
+                    </div>
                 </section>
             </div>
         </div>
@@ -84,6 +93,8 @@
         async function login() {
             let name = document.getElementById('username').value.trim();
             if (!name) return;
+            
+            // Lógica de Host (Samuel Correia) ou Jogador
             if (name !== "Samuel Correia") name = name.toUpperCase();
             
             sessionStorage.setItem('loggedUser', name);
@@ -91,15 +102,18 @@
             document.getElementById('dashboard').classList.remove('hidden');
             document.getElementById('user-display').innerText = name;
 
-            // Criar utilizador local imediato para não ver a lista vazia
-            currentUser = { username: name, score: 0, coins: 50, online: true, inventory: [] };
-            users = [currentUser];
+            if (name === "Samuel Correia") {
+                document.getElementById('host-panel').classList.remove('hidden');
+            }
+
+            // Cria usuário local para aparecer na lista na hora
+            currentUser = { username: name, score: 0, coins: 50, online: true };
+            users = [currentUser]; 
             updateUI();
 
-            // Sincronizar com o servidor
+            // Busca dados do servidor e sincroniza
             await syncData();
             
-            // Se após sincronizar eu não existir no servidor, eu me adiciono
             let userExists = users.find(u => u.username === name);
             if (!userExists) {
                 users.push(currentUser);
@@ -117,7 +131,7 @@
                     headers: { 'Content-Type': 'application/json', 'X-Master-Key': API_KEY },
                     body: JSON.stringify({ users, chat: chatGlobal })
                 });
-            } catch (e) { console.log("Erro ao salvar"); }
+            } catch (e) { console.error("Erro ao salvar"); }
         }
 
         async function syncData() {
@@ -129,7 +143,7 @@
                     chatGlobal = data.record.chat || [];
                     updateUI();
                 }
-            } catch (e) { console.log("Erro ao ler"); }
+            } catch (e) { }
         }
 
         function updateUI() {
@@ -140,20 +154,18 @@
             document.getElementById('my-score').innerText = me.score;
             document.getElementById('my-coins').innerText = me.coins;
 
-            const onlineHTML = users.filter(u => u.online).map(u => `
+            document.getElementById('online-list').innerHTML = users.filter(u => u.online).map(u => `
                 <div class="rank-item">
                     <span><span class="status-dot online-dot"></span>${u.username}</span>
                     <b>${u.score} pts</b>
                 </div>`).join('');
             
-            const offlineHTML = users.filter(u => !u.online).map(u => `
+            document.getElementById('offline-list').innerHTML = users.filter(u => !u.online).map(u => `
                 <div class="rank-item">
                     <span><span class="status-dot offline-dot"></span>${u.username}</span>
                     <b>${u.score} pts</b>
                 </div>`).join('');
 
-            document.getElementById('online-list').innerHTML = onlineHTML || "Ninguém online";
-            document.getElementById('offline-list').innerHTML = offlineHTML;
             document.getElementById('chat-box').innerHTML = chatGlobal.map(m => `<div><b>${m.id}:</b> ${m.msg}</div>`).join('');
         }
 
@@ -168,8 +180,15 @@
             const i = document.getElementById('chat-input');
             if(!i.value.trim()) return;
             chatGlobal.push({id: name, msg: i.value});
-            if(chatGlobal.length > 10) chatGlobal.shift();
+            if(chatGlobal.length > 15) chatGlobal.shift();
             i.value = ""; save(); updateUI();
+        }
+
+        function resetarTudo() {
+            if(confirm("Zerar todos os pontos?")) {
+                users.forEach(u => u.score = 0);
+                save(); updateUI();
+            }
         }
 
         async function logout() {
@@ -181,14 +200,13 @@
             location.reload();
         }
 
-        // Vídeo Simples
         async function initCamera() {
             const stream = await navigator.mediaDevices.getUserMedia({video:true, audio:true});
             document.getElementById('localVideo').srcObject = stream;
             document.getElementById('video-grid').classList.remove('hidden');
         }
 
-        setInterval(syncData, 5000);
+        setInterval(syncData, 4000);
     </script>
 </body>
 </html>

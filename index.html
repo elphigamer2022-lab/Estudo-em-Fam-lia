@@ -119,7 +119,6 @@
     </div>
 
     <script>
-        // CONFIGURAÇÕES DO BANCO GLOBAL (JSONBin)
         const BIN_ID = '695dbb1a43b1c97be91e392b'; 
         const API_KEY = '$2a$10$TFRElzQbssgoIdAi7ynyTeMqqatmKYCyEtwHBiIhqvK2Vn0A3OvNS';
         const URL = `https://api.jsonbin.io/v3/b/${BIN_ID}`;
@@ -127,33 +126,26 @@
         let users = [], bannedUsers = [], currentUser = null, spyTarget = null;
         let peer = null, localStream = null, chatGlobal = [];
 
-        const emojis = ['😀','😃','😄','😁','😆','😅','😂','🤣','😊','😇','🙂','🙃','😉','😌','😍','🥰','😘','😗','😙','😚','😋','😛','😝','😜','🤪','🤨','🧐','🤓','😎','🤩','🥳','😏','😒','😞','😔','😟','😕','🙁','☹️','😣','😖','😫','😩','🥺','😢','😭','😤','😠','😡','🤬','🤯','😳','🥵','🥶','😱','😨','😰','😥','😓','🤗','🤔','🤭','🤫','🤥','😶','😐','😑','😬','🙄','😯','😦','😧','😮','😲','🥱','😴','🤤','😪','😵','🤐','🥴','🤢','🤮','🤧','😷','🤒','🤕','🤑','🤠','😈','👿','👹','👺','🤡','ghost','💀','☠️','👽','👾','🤖','🎃'];
+        const emojis = ['😀','😃','😄','😁','😆','😅','😂','🤣','😊','😇','🙂','🙃','😉','😌','😍','🥰','😘','😗','😙','😚','😋','😛','😝','😜','🤪','🤨','🧐','🤓','😎','🤩','🥳','😏','😒','😞','😔','😟','😕','🙁','☹️','😣','😖','😫','😩','🥺','😢','😭','😤','😠','😡','🤬','🤯','😳','🥵','🥶','😱','😨','😰','😥','😓','🤗','🤔','🤭','🤫','🤥','😶','😐','😑','😬','🙄','😯','😦','😧','😮','😲','🥱','😴','🤤','😪','😵','🤐','🥴','🤢','🤮','🤧','😷','🤒','🤕','🤑','🤠','😈','👿','👹','👺','🤡','👻','💀','☠️','👽','👾','🤖','🎃'];
 
         function toggleEmojiPicker() { document.getElementById('emoji-picker').classList.toggle('hidden'); }
         function addEmoji(e) { document.getElementById('chat-input').value += e; }
 
         async function save() { 
             try {
-                const response = await fetch(URL, {
+                await fetch(URL, {
                     method: 'PUT',
-                    headers: { 
-                        'Content-Type': 'application/json', 
-                        'X-Master-Key': API_KEY 
-                    },
+                    headers: { 'Content-Type': 'application/json', 'X-Master-Key': API_KEY },
                     body: JSON.stringify({ users, bannedUsers, chat: chatGlobal })
                 });
-                if (!response.ok) console.error("Erro no salvamento (Auth):", response.status);
-            } catch (e) { console.error("Erro de rede ao salvar:", e); }
+            } catch (e) { console.error("Erro ao salvar:", e); }
         }
 
         async function syncData() {
             const loggedName = sessionStorage.getItem('loggedUser');
             if (!loggedName) return;
             try {
-                const response = await fetch(URL, { 
-                    method: 'GET',
-                    headers: { 'X-Master-Key': API_KEY } 
-                });
+                const response = await fetch(URL, { method: 'GET', headers: { 'X-Master-Key': API_KEY } });
                 const remote = await response.json();
                 const data = remote.record;
                 if (data && data.users) {
@@ -169,36 +161,51 @@
             } catch (e) { console.error("Erro na sincronização:", e); }
         }
 
-        function login() {
+        async function login() {
             let name = document.getElementById('username').value.trim();
             if (!name) return;
             if (name !== "Samuel Correia") name = name.toUpperCase();
             
-            // Define localmente primeiro para a interface destravar
             sessionStorage.setItem('loggedUser', name);
-            currentUser = { username: name, score: 0, coins: 50, inventory: [], shieldCharges: 0, online: true };
             
+            const response = await fetch(URL, { headers: { 'X-Master-Key': API_KEY } });
+            const remote = await response.json();
+            users = remote.record.users || [];
+            
+            let userExists = users.find(u => u.username === name);
+            if (!userExists) {
+                currentUser = { username: name, score: 0, coins: 50, inventory: [], shieldCharges: 0, online: true };
+                users.push(currentUser);
+            } else {
+                userExists.online = true;
+                currentUser = userExists;
+            }
+
             document.getElementById('login-screen').classList.add('hidden');
             document.getElementById('dashboard').classList.remove('hidden');
             if (name === "Samuel Correia") document.getElementById('host-panel').classList.remove('hidden');
             
-            updateUI([]); 
-
-            syncData().then(() => {
-                let userExists = users.find(u => u.username === name);
-                if (!userExists) {
-                    users.push(currentUser);
-                    save();
-                } else {
-                    userExists.online = true;
-                    save();
-                }
-            });
-            
+            await save();
+            updateUI(remote.record.chat || []);
             initPeer(name);
+            
             const picker = document.getElementById('emoji-picker');
             picker.innerHTML = emojis.map(e => `<span class="emoji-item" onclick="addEmoji('${e}')">${e}</span>`).join('');
         }
+
+        // Sincroniza Offline ao fechar aba
+        window.addEventListener('beforeunload', function () {
+            if (currentUser) {
+                const me = users.find(u => u.username === currentUser.username);
+                if (me) me.online = false;
+                fetch(URL, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json', 'X-Master-Key': API_KEY },
+                    body: JSON.stringify({ users, bannedUsers, chat: chatGlobal }),
+                    keepalive: true
+                });
+            }
+        });
 
         function initPeer(n) { 
             const pId = n.replace(/\s+/g, '-') + "-Peer";
@@ -228,8 +235,7 @@
         function addRemoteStream(n, s) { 
             if(document.getElementById("video-"+n)) return; 
             const b = document.createElement('div'); 
-            b.className = "video-box"; 
-            b.id = "video-"+n; 
+            b.className = "video-box"; b.id = "video-"+n; 
             b.innerHTML = `<span class="video-label">${n}</span><video id="vid-el-${n}" autoplay playsinline muted></video>`; 
             document.getElementById('video-grid').appendChild(b); 
             const v = document.getElementById(`vid-el-${n}`);
@@ -278,10 +284,7 @@
             document.getElementById('inventory-list').innerHTML = displayData.inventory.map((item, i) => `<div class="item-card" onclick="usarItem(${i})"><b>${item}</b></div>`).join('') || "<small>Mochila vazia</small>";
         }
 
-        function deletarMsg(index) {
-            chatGlobal.splice(index, 1);
-            save(); syncData();
-        }
+        function deletarMsg(index) { chatGlobal.splice(index, 1); save(); syncData(); }
 
         function buy(p, t) { 
             let buyer = spyTarget ? spyTarget : currentUser;
@@ -314,7 +317,7 @@
             save();
         }
 
-        function logout() { if(currentUser) currentUser.online = false; save().then(() => { sessionStorage.removeItem('loggedUser'); location.reload(); }); }
+        function logout() { if(currentUser) { users.find(u => u.username === currentUser.username).online = false; } save().then(() => { sessionStorage.removeItem('loggedUser'); location.reload(); }); }
         function resetarPontosGeral() { if(confirm("Deseja zerar o ranking global?")) { users.forEach(u => u.score = 0); save(); } }
         
         setInterval(syncData, 3000);

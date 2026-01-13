@@ -149,7 +149,7 @@
                 const response = await fetch(URL, { headers: { 'X-Master-Key': API_KEY } });
                 const remote = await response.json();
                 const data = remote.record;
-                if (data.users) {
+                if (data && data.users) {
                     users = data.users;
                     bannedUsers = data.bannedUsers || [];
                     chatGlobal = data.chat || [];

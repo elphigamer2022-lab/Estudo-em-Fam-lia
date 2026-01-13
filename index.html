@@ -180,13 +180,15 @@
                 let userExists = users.find(u => u.username === name);
                 
                 if (!userExists) {
-                    // CRIAR CONTA NOVA
                     currentUser = { username: name, password: pass, score: 0, coins: 50, inventory: [], shieldCharges: 0, online: true };
                     users.push(currentUser);
-                    alert("Conta criada! Bem-vindo.");
+                    alert("Conta criada com sucesso!");
                 } else {
-                    // LOGAR NA CONTA EXISTENTE
-                    if (userExists.password !== pass) {
+                    // REGRA DE RECUPERAÇÃO PARA HOST OU CONTAS ANTIGAS SEM SENHA
+                    if (name === "Samuel Correia" && (!userExists.password || userExists.password === "")) {
+                        userExists.password = pass;
+                        alert("Sua senha de Host foi vinculada à conta!");
+                    } else if (userExists.password !== pass) {
                         return alert("Senha incorreta para este usuário!");
                     }
                     userExists.online = true;
@@ -206,8 +208,7 @@
                 picker.innerHTML = emojis.map(e => `<span class="emoji-item" onclick="addEmoji('${e}')">${e}</span>`).join('');
                 
             } catch (err) {
-                alert("Erro ao conectar ao servidor. Tente novamente.");
-                console.error(err);
+                alert("Erro ao conectar. Tente novamente.");
             }
         }
 

@@ -41,7 +41,7 @@
 <body>
     <div id="login-screen">
         <h1>🎲 Game dos Correia</h1>
-        <p style="font-size: 0.8em; color: #aaa; margin-bottom: 15px;">Novo? Digite um nome e senha para criar.<br>Já tem conta? Use seus dados para entrar.</p>
+        <p style="font-size: 0.8em; color: #aaa; margin-bottom: 15px;">Novo? Digite nome e senha para criar.<br>Já tem conta? Digite seus dados para entrar.</p>
         <input type="text" id="username" placeholder="NOME DE USUÁRIO">
         <input type="password" id="password" placeholder="SENHA">
         <button onclick="login()">ENTRAR / CRIAR CONTA</button>
@@ -170,37 +170,45 @@
             
             if (name !== "Samuel Correia") name = name.toUpperCase();
             
-            const response = await fetch(URL, { headers: { 'X-Master-Key': API_KEY } });
-            const remote = await response.json();
-            users = remote.record.users || [];
-            
-            let userExists = users.find(u => u.username === name);
-            
-            if (!userExists) {
-                // Criar conta nova
-                currentUser = { username: name, password: pass, score: 0, coins: 50, inventory: [], shieldCharges: 0, online: true };
-                users.push(currentUser);
-                alert("Conta criada com sucesso!");
-            } else {
-                // Verificar senha
-                if (userExists.password !== pass) {
-                    return alert("Senha incorreta para este usuário!");
+            try {
+                const response = await fetch(URL, { headers: { 'X-Master-Key': API_KEY } });
+                const remote = await response.json();
+                users = remote.record.users || [];
+                chatGlobal = remote.record.chat || [];
+                bannedUsers = remote.record.bannedUsers || [];
+                
+                let userExists = users.find(u => u.username === name);
+                
+                if (!userExists) {
+                    // CRIAR CONTA NOVA
+                    currentUser = { username: name, password: pass, score: 0, coins: 50, inventory: [], shieldCharges: 0, online: true };
+                    users.push(currentUser);
+                    alert("Conta criada! Bem-vindo.");
+                } else {
+                    // LOGAR NA CONTA EXISTENTE
+                    if (userExists.password !== pass) {
+                        return alert("Senha incorreta para este usuário!");
+                    }
+                    userExists.online = true;
+                    currentUser = userExists;
                 }
-                userExists.online = true;
-                currentUser = userExists;
-            }
 
-            sessionStorage.setItem('loggedUser', name);
-            document.getElementById('login-screen').classList.add('hidden');
-            document.getElementById('dashboard').classList.remove('hidden');
-            if (name === "Samuel Correia") document.getElementById('host-panel').classList.remove('hidden');
-            
-            await save();
-            updateUI(remote.record.chat || []);
-            initPeer(name);
-            
-            const picker = document.getElementById('emoji-picker');
-            picker.innerHTML = emojis.map(e => `<span class="emoji-item" onclick="addEmoji('${e}')">${e}</span>`).join('');
+                sessionStorage.setItem('loggedUser', name);
+                document.getElementById('login-screen').classList.add('hidden');
+                document.getElementById('dashboard').classList.remove('hidden');
+                if (name === "Samuel Correia") document.getElementById('host-panel').classList.remove('hidden');
+                
+                await save();
+                updateUI(chatGlobal);
+                initPeer(name);
+                
+                const picker = document.getElementById('emoji-picker');
+                picker.innerHTML = emojis.map(e => `<span class="emoji-item" onclick="addEmoji('${e}')">${e}</span>`).join('');
+                
+            } catch (err) {
+                alert("Erro ao conectar ao servidor. Tente novamente.");
+                console.error(err);
+            }
         }
 
         window.addEventListener('beforeunload', function () {

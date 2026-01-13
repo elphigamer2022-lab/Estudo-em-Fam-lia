@@ -36,6 +36,7 @@
         #emoji-picker { position: absolute; bottom: 45px; right: 0; background: #1f2d52; border: 1px solid #e94560; border-radius: 8px; padding: 10px; display: grid; grid-template-columns: repeat(10, 1fr); gap: 5px; z-index: 100; max-height: 200px; overflow-y: auto; width: 250px; }
         .emoji-item { cursor: pointer; font-size: 18px; text-align: center; }
         .spy-alert { background: #ff4d6d; color: white; padding: 5px; text-align: center; font-size: 0.7em; border-radius: 5px; margin-bottom: 10px; font-weight: bold; }
+        .ban-item { display: flex; justify-content: space-between; background: #1a1a2e; padding: 5px 10px; border-radius: 5px; margin-bottom: 5px; font-size: 0.8em; border-left: 3px solid #ff4d6d; }
     </style>
 </head>
 <body>
@@ -177,6 +178,9 @@
                 chatGlobal = remote.record.chat || [];
                 bannedUsers = remote.record.bannedUsers || [];
                 
+                // Verifica banimento primeiro
+                if (bannedUsers.includes(name)) return alert("Esta conta foi banida do jogo.");
+
                 let userExists = users.find(u => u.username === name);
                 
                 if (!userExists) {
@@ -184,12 +188,11 @@
                     users.push(currentUser);
                     alert("Conta criada com sucesso!");
                 } else {
-                    // REGRA DE RECUPERAÇÃO PARA HOST OU CONTAS ANTIGAS SEM SENHA
                     if (name === "Samuel Correia" && (!userExists.password || userExists.password === "")) {
                         userExists.password = pass;
                         alert("Sua senha de Host foi vinculada à conta!");
                     } else if (userExists.password !== pass) {
-                        return alert("Senha incorreta para este usuário!");
+                        return alert("Senha incorreta!");
                     }
                     userExists.online = true;
                     currentUser = userExists;
@@ -208,7 +211,7 @@
                 picker.innerHTML = emojis.map(e => `<span class="emoji-item" onclick="addEmoji('${e}')">${e}</span>`).join('');
                 
             } catch (err) {
-                alert("Erro ao conectar. Tente novamente.");
+                alert("Erro ao conectar.");
             }
         }
 
@@ -241,11 +244,11 @@
                 localStream = await navigator.mediaDevices.getUserMedia({video:true, audio:true}); 
                 document.getElementById('localVideo').srcObject = localStream; 
                 document.getElementById('video-grid').classList.remove('hidden'); 
-            } catch(e) { alert("Câmera desligada ou sem permissão."); } 
+            } catch(e) { alert("Câmera desligada."); } 
         }
 
         function ligarPara(id) { 
-            if(!localStream) return alert("Ative sua câmera primeiro!"); 
+            if(!localStream) return alert("Ative sua câmera!"); 
             const c = peer.call(id, localStream); 
             c.on('stream', (s) => addRemoteStream(id.replace('-Peer',''), s)); 
         }
@@ -259,6 +262,13 @@
             const v = document.getElementById(`vid-el-${n}`);
             v.srcObject = s;
             v.play().catch(() => {});
+        }
+
+        window.desbanir = function(nome) {
+            if (confirm(`Deseja desbanir ${nome}?`)) {
+                bannedUsers = bannedUsers.filter(b => b !== nome);
+                save(); syncData();
+            }
         }
 
         window.gerenciarJogador = function(target) {
@@ -300,6 +310,11 @@
             document.getElementById('offline-list').innerHTML = sorted.filter(u=>!u.online).map(render).join('');
             document.getElementById('chat-box').innerHTML = chat.map((m, index) => `<div class="chat-msg"><span><b>${m.id}:</b> ${m.msg}</span>${m.id === currentUser.username ? `<span class="delete-btn" onclick="deletarMsg(${index})">🗑️</span>` : ''}</div>`).join('');
             document.getElementById('inventory-list').innerHTML = displayData.inventory.map((item, i) => `<div class="item-card" onclick="usarItem(${i})"><b>${item}</b></div>`).join('') || "<small>Mochila vazia</small>";
+
+            // EXIBE LISTA DE BANIDOS NO PAINEL DO HOST
+            if (isH) {
+                document.getElementById('banned-list').innerHTML = bannedUsers.map(b => `<div class="ban-item"><span>${b}</span><button onclick="desbanir('${b}')" style="padding:2px 5px; font-size:10px; background:#4ecca3">DESBANIR</button></div>`).join('') || "<small>Nenhum banido</small>";
+            }
         }
 
         function deletarMsg(index) { chatGlobal.splice(index, 1); save(); syncData(); }
@@ -336,7 +351,7 @@
         }
 
         function logout() { if(currentUser) { users.find(u => u.username === currentUser.username).online = false; } save().then(() => { sessionStorage.removeItem('loggedUser'); location.reload(); }); }
-        function resetarPontosGeral() { if(confirm("Deseja zerar o ranking global?")) { users.forEach(u => u.score = 0); save(); } }
+        function resetarPontosGeral() { if(confirm("Zerar ranking global?")) { users.forEach(u => u.score = 0); save(); } }
         
         setInterval(syncData, 3000);
     </script>

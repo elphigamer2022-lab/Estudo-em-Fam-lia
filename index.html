@@ -110,7 +110,7 @@
                     <div class="chat-input-area">
                         <input type="text" id="chat-input" placeholder="Mensagem..." onkeypress="if(event.key==='Enter') enviarMsg()" style="flex:1; padding:5px; margin:0;">
                         <button onclick="toggleEmojiPicker()" style="padding: 5px;">😀</button>
-                        <button onclick="enviarMsg()">></button>
+                        <button onclick="enviarMsg()">Enviar</button>
                         <div id="emoji-picker" class="hidden"></div>
                     </div>
                 </section>
@@ -121,32 +121,39 @@
     <script>
         // CONFIGURAÇÕES DO BANCO GLOBAL (JSONBin)
         const BIN_ID = '695dbb1a43b1c97be91e392b'; 
-        const API_KEY = '$2a$10$TFRelzQbssgoIdAi7ynyTeMqqatmKYCyEtwHBiIhqvK2Vn0A3OvNS';
+        const API_KEY = '$2a$10$TFRElzQbssgoIdAi7ynyTeMqqatmKYCyEtwHBiIhqvK2Vn0A3OvNS';
         const URL = `https://api.jsonbin.io/v3/b/${BIN_ID}`;
 
         let users = [], bannedUsers = [], currentUser = null, spyTarget = null;
         let peer = null, localStream = null, chatGlobal = [];
 
-        const emojis = ['😀','😃','😄','😁','😆','😅','😂','🤣','😊','😇','🙂','🙃','😉','😌','😍','🥰','😘','😗','😙','😚','😋','😛','😝','😜','🤪','🤨','🧐','🤓','😎','🤩','🥳','😏','😒','😞','😔','😟','😕','🙁','☹️','😣','😖','😫','😩','🥺','😢','😭','😤','😠','😡','🤬','🤯','😳','🥵','🥶','😱','😨','😰','😥','😓','🤗','🤔','🤭','🤫','🤥','😶','😐','😑','😬','🙄','😯','😦','😧','😮','😲','🥱','😴','🤤','😪','😵','🤐','🥴','🤢','🤮','🤧','😷','🤒','🤕','🤑','🤠','😈','👿','👹','👺','🤡','👻','💀','☠️','👽','👾','🤖','🎃'];
+        const emojis = ['😀','😃','😄','😁','😆','😅','😂','🤣','😊','😇','🙂','🙃','😉','😌','😍','🥰','😘','😗','😙','😚','😋','😛','😝','😜','🤪','🤨','🧐','🤓','😎','🤩','🥳','😏','😒','😞','😔','😟','😕','🙁','☹️','😣','😖','😫','😩','🥺','😢','😭','😤','😠','😡','🤬','🤯','😳','🥵','🥶','😱','😨','😰','😥','😓','🤗','🤔','🤭','🤫','🤥','😶','😐','😑','😬','🙄','😯','😦','😧','😮','😲','🥱','😴','🤤','😪','😵','🤐','🥴','🤢','🤮','🤧','😷','🤒','🤕','🤑','🤠','😈','👿','👹','👺','🤡','ghost','💀','☠️','👽','👾','🤖','🎃'];
 
         function toggleEmojiPicker() { document.getElementById('emoji-picker').classList.toggle('hidden'); }
         function addEmoji(e) { document.getElementById('chat-input').value += e; }
 
         async function save() { 
             try {
-                await fetch(URL, {
+                const response = await fetch(URL, {
                     method: 'PUT',
-                    headers: { 'Content-Type': 'application/json', 'X-Master-Key': API_KEY },
+                    headers: { 
+                        'Content-Type': 'application/json', 
+                        'X-Master-Key': API_KEY 
+                    },
                     body: JSON.stringify({ users, bannedUsers, chat: chatGlobal })
                 });
-            } catch (e) { console.error("Erro ao salvar nuvem:", e); }
+                if (!response.ok) console.error("Erro no salvamento (Auth):", response.status);
+            } catch (e) { console.error("Erro de rede ao salvar:", e); }
         }
 
         async function syncData() {
             const loggedName = sessionStorage.getItem('loggedUser');
             if (!loggedName) return;
             try {
-                const response = await fetch(URL, { headers: { 'X-Master-Key': API_KEY } });
+                const response = await fetch(URL, { 
+                    method: 'GET',
+                    headers: { 'X-Master-Key': API_KEY } 
+                });
                 const remote = await response.json();
                 const data = remote.record;
                 if (data && data.users) {
@@ -154,10 +161,12 @@
                     bannedUsers = data.bannedUsers || [];
                     chatGlobal = data.chat || [];
                     const updatedMe = users.find(u => u.username === loggedName);
-                    if (updatedMe) currentUser = updatedMe;
-                    updateUI(chatGlobal);
+                    if (updatedMe) {
+                        currentUser = updatedMe;
+                        updateUI(chatGlobal);
+                    }
                 }
-            } catch (e) { console.error("Erro na sincronização"); }
+            } catch (e) { console.error("Erro na sincronização:", e); }
         }
 
         function login() {
@@ -165,25 +174,30 @@
             if (!name) return;
             if (name !== "Samuel Correia") name = name.toUpperCase();
             
+            // Define localmente primeiro para a interface destravar
+            sessionStorage.setItem('loggedUser', name);
+            currentUser = { username: name, score: 0, coins: 50, inventory: [], shieldCharges: 0, online: true };
+            
+            document.getElementById('login-screen').classList.add('hidden');
+            document.getElementById('dashboard').classList.remove('hidden');
+            if (name === "Samuel Correia") document.getElementById('host-panel').classList.remove('hidden');
+            
+            updateUI([]); 
+
             syncData().then(() => {
-                if (bannedUsers.includes(name)) return alert("Banido!");
-                let user = users.find(u => u.username === name);
-                if (!user) {
-                    user = { username: name, score: 0, coins: 50, inventory: [], shieldCharges: 0, online: true, isRobbing: false };
-                    users.push(user);
+                let userExists = users.find(u => u.username === name);
+                if (!userExists) {
+                    users.push(currentUser);
+                    save();
                 } else {
-                    user.online = true;
+                    userExists.online = true;
+                    save();
                 }
-                currentUser = user; 
-                sessionStorage.setItem('loggedUser', name);
-                initPeer(name);
-                const picker = document.getElementById('emoji-picker');
-                picker.innerHTML = emojis.map(e => `<span class="emoji-item" onclick="addEmoji('${e}')">${e}</span>`).join('');
-                save();
-                document.getElementById('login-screen').classList.add('hidden');
-                document.getElementById('dashboard').classList.remove('hidden');
-                if (name === "Samuel Correia") document.getElementById('host-panel').classList.remove('hidden');
             });
+            
+            initPeer(name);
+            const picker = document.getElementById('emoji-picker');
+            picker.innerHTML = emojis.map(e => `<span class="emoji-item" onclick="addEmoji('${e}')">${e}</span>`).join('');
         }
 
         function initPeer(n) { 
@@ -202,11 +216,11 @@
                 localStream = await navigator.mediaDevices.getUserMedia({video:true, audio:true}); 
                 document.getElementById('localVideo').srcObject = localStream; 
                 document.getElementById('video-grid').classList.remove('hidden'); 
-            } catch(e) { alert("Câmera OFF"); } 
+            } catch(e) { alert("Câmera desligada ou sem permissão."); } 
         }
 
         function ligarPara(id) { 
-            if(!localStream) return alert("Ative sua câmera!"); 
+            if(!localStream) return alert("Ative sua câmera primeiro!"); 
             const c = peer.call(id, localStream); 
             c.on('stream', (s) => addRemoteStream(id.replace('-Peer',''), s)); 
         }
@@ -227,11 +241,11 @@
             if (sessionStorage.getItem('loggedUser') !== "Samuel Correia") return;
             const u = users.find(x => x.username === target);
             if (spyTarget && (target === spyTarget.username)) { spyTarget = null; document.getElementById('spy-indicator').classList.add('hidden'); return; }
-            const op = prompt(`Host: ${target}\n1-Add Pts, 2-Rem Pts, 3-Ban, 4-Moedas, 5-ESPIAR`);
+            const op = prompt(`Painel Host: ${target}\n1-Add Pontos, 2-Rem Pontos, 3-Banir, 4-Moedas, 5-ESPIAR`);
             if (op === "1") u.score += parseInt(prompt("Valor:"));
             else if (op === "2") u.score = Math.max(0, u.score - parseInt(prompt("Valor:")));
-            else if (op === "3" && confirm("Ban?")) { bannedUsers.push(target); users = users.filter(x => x.username !== target); }
-            else if (op === "4") u.coins = parseInt(prompt("Saldo:"));
+            else if (op === "3" && confirm("Confirmar Banimento?")) { bannedUsers.push(target); users = users.filter(x => x.username !== target); }
+            else if (op === "4") u.coins = parseInt(prompt("Novo Saldo:"));
             else if (op === "5") { spyTarget = u; document.getElementById('spy-indicator').classList.remove('hidden'); }
             save(); syncData();
         }
@@ -242,7 +256,7 @@
             document.getElementById('user-display').innerText = displayData.username + (spyTarget ? " (MODO INVASÃO)" : "");
             document.getElementById('my-score').innerText = displayData.score;
             document.getElementById('my-coins').innerText = displayData.coins;
-            document.getElementById('shield-status').innerText = displayData.shieldCharges > 0 ? `🛡️ PROTEÇÃO: ${displayData.shieldCharges} CARGAS` : "";
+            document.getElementById('shield-status').innerText = displayData.shieldCharges > 0 ? `🛡️ ESCUDO: ${displayData.shieldCharges} CARGAS` : "";
             
             const isH = sessionStorage.getItem('loggedUser') === "Samuel Correia";
             const sorted = [...users].sort((a,b) => b.score - a.score);
@@ -261,7 +275,7 @@
             document.getElementById('online-list').innerHTML = sorted.filter(u=>u.online).map(render).join('');
             document.getElementById('offline-list').innerHTML = sorted.filter(u=>!u.online).map(render).join('');
             document.getElementById('chat-box').innerHTML = chat.map((m, index) => `<div class="chat-msg"><span><b>${m.id}:</b> ${m.msg}</span>${m.id === currentUser.username ? `<span class="delete-btn" onclick="deletarMsg(${index})">🗑️</span>` : ''}</div>`).join('');
-            document.getElementById('inventory-list').innerHTML = displayData.inventory.map((item, i) => `<div class="item-card" onclick="usarItem(${i})"><b>${item}</b></div>`).join('') || "<small>Vazio</small>";
+            document.getElementById('inventory-list').innerHTML = displayData.inventory.map((item, i) => `<div class="item-card" onclick="usarItem(${i})"><b>${item}</b></div>`).join('') || "<small>Mochila vazia</small>";
         }
 
         function deletarMsg(index) {
@@ -271,7 +285,7 @@
 
         function buy(p, t) { 
             let buyer = spyTarget ? spyTarget : currentUser;
-            if(buyer.coins >= p) { buyer.coins -= p; buyer.inventory.push(t); save(); } else alert("Sem moedas"); 
+            if(buyer.coins >= p) { buyer.coins -= p; buyer.inventory.push(t); save(); } else alert("Moedas insuficientes!"); 
         }
 
         function usarItem(i) {
@@ -279,17 +293,7 @@
             const item = activeUser.inventory[i];
             if (item === "Escudo") activeUser.shieldCharges += 3;
             else if (item === "Roubo") {
-                activeUser.isRobbing = true;
                 users.forEach(u => { if(u.username !== activeUser.username) { u.coins = Math.max(0, u.coins - 10); activeUser.coins += 10; }});
-                setTimeout(() => { activeUser.isRobbing = false; save(); }, 5000);
-            }
-            else if (item === "Invasão") {
-                const alvo = prompt("Nome do jogador para invadir:");
-                const userAlvo = users.find(u => u.username === (alvo||"").toUpperCase() || u.username === alvo);
-                if (userAlvo && userAlvo.username !== currentUser.username) {
-                    spyTarget = userAlvo;
-                    document.getElementById('spy-indicator').classList.remove('hidden');
-                }
             }
             activeUser.inventory.splice(i, 1);
             save();
@@ -297,8 +301,7 @@
 
         function ganheiRodada() {
             let player = spyTarget ? spyTarget : currentUser;
-            const old = player.score; player.score += 10; player.coins += 5;
-            if(Math.floor(player.score/100)>Math.floor(old/100)) player.coins += 50;
+            player.score += 10; player.coins += 5;
             users.forEach(u => { if(u.username !== player.username) { if(u.shieldCharges > 0) u.shieldCharges--; else u.score = Math.max(0, u.score - 15); } });
             save();
         }
@@ -311,11 +314,10 @@
             save();
         }
 
-        function logout() { if(currentUser) currentUser.online = false; spyTarget = null; save().then(() => { sessionStorage.removeItem('loggedUser'); location.reload(); }); }
-        function resetarPontosGeral() { if(confirm("Zerar ranking?")) { users.forEach(u => u.score = 0); save(); } }
-        function desbanir(n) { bannedUsers = bannedUsers.filter(x => x !== n); save(); }
+        function logout() { if(currentUser) currentUser.online = false; save().then(() => { sessionStorage.removeItem('loggedUser'); location.reload(); }); }
+        function resetarPontosGeral() { if(confirm("Deseja zerar o ranking global?")) { users.forEach(u => u.score = 0); save(); } }
         
-        setInterval(syncData, 2000);
+        setInterval(syncData, 3000);
     </script>
 </body>
 </html>

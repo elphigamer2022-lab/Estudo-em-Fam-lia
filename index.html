@@ -3,284 +3,192 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Game dos Correia - v45</title>
+    <title>Game dos Correia - Estável</title>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <style>
-        /* ESTILO GERAL */
-        body { font-family: sans-serif; background-color: #1a1a2e; color: #fff; margin: 0; display: flex; justify-content: center; padding: 10px; }
+        body { font-family: sans-serif; background-color: #1a1a2e; color: #fff; margin: 0; padding: 10px; display: flex; justify-content: center; }
         .hidden { display: none !important; }
-        
-        /* TELA DE LOGIN */
-        #login-screen { text-align: center; margin-top: 10vh; padding: 30px; background: #16213e; border-radius: 15px; width: 320px; border: 1px solid #e94560; box-shadow: 0 0 20px rgba(233, 69, 96, 0.3); }
-        input { padding: 12px; border-radius: 5px; border: none; width: 90%; margin-bottom: 15px; font-size: 16px; background: #fff; color: #000; }
-        button { padding: 10px 15px; background-color: #e94560; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; margin: 5px; transition: 0.3s; }
-        button:hover { background-color: #ff4d6d; }
-
-        /* PAINEL PRINCIPAL */
+        #login-screen { text-align: center; margin-top: 10vh; padding: 30px; background: #16213e; border-radius: 15px; width: 320px; border: 1px solid #e94560; }
+        input { padding: 12px; border-radius: 5px; border: none; width: 90%; margin-bottom: 15px; font-size: 16px; }
+        button { padding: 10px 15px; background-color: #e94560; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
         #dashboard { width: 100%; max-width: 1100px; }
         header { display: flex; justify-content: space-between; align-items: center; background: #16213e; padding: 20px; border-radius: 15px; margin-bottom: 20px; border-bottom: 4px solid #e94560; }
-        
         .container { display: grid; grid-template-columns: 1fr 1.5fr; gap: 20px; }
         @media (max-width: 800px) { .container { grid-template-columns: 1fr; } }
-        
         .card { background: #0f3460; padding: 15px; border-radius: 12px; margin-bottom: 20px; }
-        h3 { margin: 0 0 10px 0; color: #e94560; text-transform: uppercase; font-size: 0.85em; border-bottom: 1px solid #1a1a2e; padding-bottom: 5px; }
-
-        /* LISTA DE JOGADORES */
-        .rank-item { padding: 10px; margin-bottom: 8px; background: #16213e; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; font-size: 0.9em; border: 1px solid #1f2d52; }
+        .rank-item { padding: 10px; margin-bottom: 8px; background: #16213e; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #1f2d52; }
         .status-dot { height: 10px; width: 10px; border-radius: 50%; display: inline-block; margin-right: 8px; }
         .online-dot { background-color: #4ecca3; box-shadow: 0 0 8px #4ecca3; }
         .offline-dot { background-color: #555; }
-
-        /* GRADE DE VÍDEO (REQUISITO 1) */
-        #video-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; background: #000; padding: 12px; border-radius: 12px; margin-top: 10px; }
-        .video-box { position: relative; background: #222; border-radius: 8px; overflow: hidden; aspect-ratio: 4/3; border: 2px solid #333; }
+        #video-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; background: #000; padding: 12px; border-radius: 12px; }
+        .video-box { position: relative; background: #222; border-radius: 8px; overflow: hidden; aspect-ratio: 4/3; }
         video { width: 100%; height: 100%; object-fit: cover; }
-        #localVideo { transform: scaleX(-1); }
-        .video-label { position: absolute; bottom: 5px; left: 5px; background: rgba(0,0,0,0.7); padding: 2px 8px; font-size: 10px; border-radius: 4px; z-index: 5; }
-
-        /* CONTROLES DE MÍDIA (REQUISITO 2) */
-        .video-controls { position: absolute; top: 5px; right: 5px; display: flex; gap: 4px; z-index: 10; }
-        .control-btn { background: rgba(0,0,0,0.6); border: none; color: white; padding: 4px; border-radius: 50%; cursor: pointer; width: 30px; height: 30px; font-size: 14px; display: flex; align-items: center; justify-content: center; }
-        .control-btn:hover { background: #e94560; }
-
-        /* CHAT E ITENS */
-        .chat-box { height: 150px; overflow-y: auto; background: #16213e; padding: 10px; border-radius: 8px; margin-bottom: 10px; font-size: 0.8em; }
-        .item-card { background: #1a1a2e; padding: 10px; text-align: center; border-radius: 10px; border: 1px solid #333; }
     </style>
 </head>
 <body>
 
     <div id="login-screen">
         <h1>🎲 Game dos Correia</h1>
-        <p style="font-size: 0.8em; color: #aaa;">Versão Multi-Conexão v45</p>
-        <input type="text" id="username" placeholder="Digite seu nome">
-        <button onclick="login()">ENTRAR NO JOGO</button>
+        <input type="text" id="username" placeholder="Teu Nome">
+        <button onclick="login()">ENTRAR</button>
     </div>
 
     <div id="dashboard" class="hidden">
         <header>
-            <div>
-                <h2 id="user-display">Carregando...</h2>
-            </div>
-            <div style="text-align: right">
-                <div>🏆 <span id="my-score">0</span> pts</div>
-                <div style="color: #ffd700;">💰 <span id="my-coins">0</span></div>
-            </div>
-            <button onclick="logout()" style="background:#333">Sair</button>
+            <h2 id="user-display">---</h2>
+            <div>🏆 <span id="my-score">0</span> | 💰 <span id="my-coins">0</span></div>
+            <button onclick="logout()">Sair</button>
         </header>
 
         <div class="container">
             <div class="column">
                 <section class="card">
-                    <h3>🟢 Online Agora</h3>
-                    <div id="online-list"></div>
-                    <hr style="border: 0; border-top: 1px solid #16213e; margin: 15px 0;">
+                    <h3>🟢 Online</h3>
+                    <div id="online-list">A carregar...</div>
+                    <hr style="border:0; border-top:1px solid #16213e; margin:10px 0;">
                     <h3>⚪ Offline</h3>
                     <div id="offline-list"></div>
                 </section>
-                
                 <section class="card">
-                    <h3>📹 Vídeo Chamada</h3>
-                    <button onclick="initCamera()" style="width:100%; background:#4a90e2">🎥 ATIVAR MINHA CÂMERA</button>
+                    <h3>📹 Vídeo</h3>
+                    <button onclick="initCamera()" style="width:100%; background:#4a90e2; margin-bottom:10px;">🎥 Ligar Câmera</button>
                     <div id="video-grid" class="hidden">
-                        <div class="video-box" id="local-video-box">
-                            <div class="video-controls">
-                                <button class="control-btn" title="Mudo" onclick="toggleMic()">🎤</button>
-                                <button class="control-btn" title="Câmera" onclick="toggleCam()">📷</button>
-                            </div>
-                            <span class="video-label">Você</span>
-                            <video id="localVideo" autoplay muted playsinline></video>
+                        <div class="video-box">
+                            <video id="localVideo" autoplay muted playsinline style="transform: scaleX(-1);"></video>
                         </div>
                     </div>
                 </section>
-
-                <section id="host-panel" class="card hidden" style="border: 2px solid #ff4d6d;">
-                    <h3>⚙️ Host: Ações Globais</h3>
-                    <button onclick="resetarPontosGeral()" style="width:100%; background: #ff4d6d;">🔄 ZERAR RANKING GERAL</button>
-                </section>
             </div>
-
             <div class="column">
                 <section class="card">
-                    <h3>🛒 Loja de Itens</h3>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 5px;">
-                        <button onclick="buy(100, 'Escudo')">🛡️ Escudo (100💰)</button>
-                        <button onclick="buy(500, 'Roubo')">💸 Roubo (500💰)</button>
-                        <button onclick="buy(600, 'Bomba')" style="background:#bf0603">💣 Bomba (600💰)</button>
-                    </div>
-                </section>
-                <section class="card">
-                    <h3>🎒 Meu Inventário</h3>
-                    <div id="inventory-list" style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;"></div>
-                </section>
-                <section class="card">
                     <h3>🎮 Jogo</h3>
-                    <button style="width:100%; height: 50px; background:#4ecca3; color:#000; font-size: 1.2em;" onclick="ganheiRodada()">⭐ GANHEI RODADA</button>
+                    <button style="width:100%; height:50px; background:#4ecca3; color:#000;" onclick="ganheiRodada()">⭐ GANHEI RODADA</button>
                 </section>
                 <section class="card">
                     <h3>💬 Chat</h3>
-                    <div id="chat-box" class="chat-box"></div>
-                    <div style="display:flex; gap:5px;">
-                        <input type="text" id="chat-input" placeholder="Mensagem..." onkeypress="if(event.key==='Enter') enviarMsg()" style="flex:1; margin:0;">
-                        <button onclick="enviarMsg()">Enviar</button>
-                    </div>
+                    <div id="chat-box" style="height:100px; overflow-y:auto; font-size:0.9em; margin-bottom:10px;"></div>
+                    <input type="text" id="chat-input" placeholder="Mensagem..." onkeypress="if(event.key==='Enter') enviarMsg()" style="width:70%;">
+                    <button onclick="enviarMsg()">Enviar</button>
                 </section>
             </div>
         </div>
     </div>
 
     <script>
-        // CONFIGURAÇÕES API
         const BIN_ID = '695dbb1a43b1c97be91e392b'; 
         const API_KEY = '$2a$10$TFRelzQbssgoIdAi7ynyTeMqqatmKYCyEtwHBiIhqvK2Vn0A3OvNS';
         const URL = `https://api.jsonbin.io/v3/b/${BIN_ID}`;
 
-        let users = [], currentUser = null;
-        let peer = null, localStream = null, chatGlobal = [];
+        let users = [], currentUser = null, chatGlobal = [];
 
-        // 1. FUNÇÃO DE LOGIN (IMEDIATA)
         async function login() {
             let name = document.getElementById('username').value.trim();
-            if (!name) return alert("Digite um nome!");
-            
+            if (!name) return;
             if (name !== "Samuel Correia") name = name.toUpperCase();
-            sessionStorage.setItem('loggedUser', name);
             
-            // Entra na tela primeiro para não travar
+            sessionStorage.setItem('loggedUser', name);
             document.getElementById('login-screen').classList.add('hidden');
             document.getElementById('dashboard').classList.remove('hidden');
             document.getElementById('user-display').innerText = name;
+
+            // Criar utilizador local imediato para não ver a lista vazia
+            currentUser = { username: name, score: 0, coins: 50, online: true, inventory: [] };
+            users = [currentUser];
+            updateUI();
+
+            // Sincronizar com o servidor
+            await syncData();
             
-            if (name === "Samuel Correia") document.getElementById('host-panel').classList.remove('hidden');
-
-            // Inicia sistemas de vídeo e banco de dados
-            initPeer(name);
-            await firstSync(name);
+            // Se após sincronizar eu não existir no servidor, eu me adiciono
+            let userExists = users.find(u => u.username === name);
+            if (!userExists) {
+                users.push(currentUser);
+            } else {
+                userExists.online = true;
+                currentUser = userExists;
+            }
+            await save();
         }
 
-        // 2. SINCRONIZAÇÃO INICIAL E SALVAMENTO
-        async function firstSync(name) {
-            try {
-                const response = await fetch(URL, { headers: { 'X-Master-Key': API_KEY } });
-                const remote = await response.json();
-                users = remote.record.users || [];
-                chatGlobal = remote.record.chat || [];
-
-                let userExists = users.find(u => u.username === name);
-                if (!userExists) {
-                    currentUser = { username: name, score: 0, coins: 50, inventory: [], online: true };
-                    users.push(currentUser);
-                } else {
-                    userExists.online = true;
-                    currentUser = userExists;
-                }
-                await save();
-                updateUI(chatGlobal);
-            } catch (e) { console.error("Erro ao sincronizar login"); }
-        }
-
-        async function save() { 
+        async function save() {
             try {
                 await fetch(URL, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json', 'X-Master-Key': API_KEY },
-                    body: JSON.stringify({ users, bannedUsers: [], chat: chatGlobal })
+                    body: JSON.stringify({ users, chat: chatGlobal })
                 });
-            } catch (e) { console.error("Erro ao salvar dados"); }
+            } catch (e) { console.log("Erro ao salvar"); }
         }
 
         async function syncData() {
-            const name = sessionStorage.getItem('loggedUser');
-            if(!name) return;
             try {
-                const response = await fetch(URL, { headers: { 'X-Master-Key': API_KEY } });
-                const remote = await response.json();
-                if (remote.record) {
-                    users = remote.record.users || [];
-                    chatGlobal = remote.record.chat || [];
-                    const updatedMe = users.find(u => u.username === name);
-                    if (updatedMe) currentUser = updatedMe;
-                    updateUI(chatGlobal);
+                const res = await fetch(URL, { headers: { 'X-Master-Key': API_KEY } });
+                const data = await res.json();
+                if (data.record) {
+                    users = data.record.users || [];
+                    chatGlobal = data.record.chat || [];
+                    updateUI();
                 }
-            } catch (e) { }
+            } catch (e) { console.log("Erro ao ler"); }
         }
 
-        // 3. VÍDEO E PEERJS
-        function initPeer(n) { 
-            const pId = n.replace(/\s+/g, '-') + "-Peer";
-            peer = new Peer(pId); 
-            peer.on('call', (c) => { 
-                navigator.mediaDevices.getUserMedia({video:true, audio:true}).then((s) => { 
-                    c.answer(s); 
-                    addRemoteStream(c.peer.replace('-Peer',''), s); 
-                }); 
-            }); 
-        }
+        function updateUI() {
+            const name = sessionStorage.getItem('loggedUser');
+            if (!name) return;
 
-        async function initCamera() { 
-            try {
-                localStream = await navigator.mediaDevices.getUserMedia({video:true, audio:true}); 
-                document.getElementById('localVideo').srcObject = localStream; 
-                document.getElementById('video-grid').classList.remove('hidden'); 
-            } catch (e) { alert("Erro ao acessar câmera!"); }
-        }
+            const me = users.find(u => u.username === name) || currentUser;
+            document.getElementById('my-score').innerText = me.score;
+            document.getElementById('my-coins').innerText = me.coins;
 
-        function toggleMic() { if(localStream) localStream.getAudioTracks()[0].enabled = !localStream.getAudioTracks()[0].enabled; }
-        function toggleCam() { if(localStream) localStream.getVideoTracks()[0].enabled = !localStream.getVideoTracks()[0].enabled; }
-
-        function ligarPara(id) { 
-            if(!localStream) return alert("Ative sua câmera primeiro!"); 
-            const c = peer.call(id, localStream); 
-            c.on('stream', (s) => addRemoteStream(id.replace('-Peer',''), s)); 
-        }
-
-        function addRemoteStream(n, s) { 
-            if(document.getElementById("video-"+n)) return; 
-            const b = document.createElement('div'); 
-            b.className = "video-box"; b.id = "video-"+n; 
-            b.innerHTML = `<span class="video-label">${n}</span><video id="vid-el-${n}" autoplay playsinline></video>`; 
-            document.getElementById('video-grid').appendChild(b); 
-            document.getElementById(`vid-el-${n}`).srcObject = s;
-        }
-
-        // 4. INTERFACE DO USUÁRIO
-        function updateUI(chat) {
-            if (!currentUser) return;
-            document.getElementById('my-score').innerText = currentUser.score;
-            document.getElementById('my-coins').innerText = currentUser.coins;
+            const onlineHTML = users.filter(u => u.online).map(u => `
+                <div class="rank-item">
+                    <span><span class="status-dot online-dot"></span>${u.username}</span>
+                    <b>${u.score} pts</b>
+                </div>`).join('');
             
-            const sorted = [...users].sort((a,b) => b.score - a.score);
-            const render = (u) => {
-                const pId = u.username.replace(/\s+/g, '-') + "-Peer";
-                return `<div class="rank-item">
-                    <span><span class="status-dot ${u.online?'online-dot':'offline-dot'}"></span>${u.username}</span>
-                    <div>
-                        ${(u.online && u.username !== currentUser.username) ? `<button onclick="ligarPara('${pId}')" style="font-size:10px; background:#4ecca3; color:#000;">LIGAR 📞</button>` : ''}
-                        <span style="margin-left:10px; font-weight:bold;">${u.score} pts</span>
-                    </div>
-                </div>`;
-            };
-            
-            document.getElementById('online-list').innerHTML = sorted.filter(u=>u.online).map(render).join('') || "Ninguém online";
-            document.getElementById('offline-list').innerHTML = sorted.filter(u=>!u.online).map(render).join('') || "Ninguém offline";
-            document.getElementById('chat-box').innerHTML = chat.map(m => `<div><b>${m.id}:</b> ${m.msg}</div>`).join('');
-            document.getElementById('inventory-list').innerHTML = currentUser.inventory.map(item => `<div class="item-card">${item}</div>`).join('') || "Vazio";
+            const offlineHTML = users.filter(u => !u.online).map(u => `
+                <div class="rank-item">
+                    <span><span class="status-dot offline-dot"></span>${u.username}</span>
+                    <b>${u.score} pts</b>
+                </div>`).join('');
+
+            document.getElementById('online-list').innerHTML = onlineHTML || "Ninguém online";
+            document.getElementById('offline-list').innerHTML = offlineHTML;
+            document.getElementById('chat-box').innerHTML = chatGlobal.map(m => `<div><b>${m.id}:</b> ${m.msg}</div>`).join('');
         }
 
-        // 5. AÇÕES DO JOGO
-        function buy(p, t) { if(currentUser.coins >= p) { currentUser.coins -= p; currentUser.inventory.push(t); save(); } else alert("Sem moedas!"); }
-        function ganheiRodada() { currentUser.score += 10; currentUser.coins += 5; save(); }
+        function ganheiRodada() {
+            const name = sessionStorage.getItem('loggedUser');
+            let me = users.find(u => u.username === name);
+            if(me) { me.score += 10; me.coins += 5; save(); updateUI(); }
+        }
+
         function enviarMsg() {
-            const i = document.getElementById('chat-input'); if(!i.value.trim()) return;
-            chatGlobal.push({id:currentUser.username, msg:i.value}); if(chatGlobal.length>15) chatGlobal.shift();
-            i.value = ""; save();
+            const name = sessionStorage.getItem('loggedUser');
+            const i = document.getElementById('chat-input');
+            if(!i.value.trim()) return;
+            chatGlobal.push({id: name, msg: i.value});
+            if(chatGlobal.length > 10) chatGlobal.shift();
+            i.value = ""; save(); updateUI();
         }
-        function logout() { if(currentUser) currentUser.online = false; save().then(() => { sessionStorage.removeItem('loggedUser'); location.reload(); }); }
-        function resetarPontosGeral() { if(confirm("Zerar ranking global?")) { users.forEach(u => u.score = 0); save(); } }
-        
-        // Loop de atualização (4 segundos)
-        setInterval(syncData, 4000);
+
+        async function logout() {
+            const name = sessionStorage.getItem('loggedUser');
+            let me = users.find(u => u.username === name);
+            if(me) me.online = false;
+            await save();
+            sessionStorage.clear();
+            location.reload();
+        }
+
+        // Vídeo Simples
+        async function initCamera() {
+            const stream = await navigator.mediaDevices.getUserMedia({video:true, audio:true});
+            document.getElementById('localVideo').srcObject = stream;
+            document.getElementById('video-grid').classList.remove('hidden');
+        }
+
+        setInterval(syncData, 5000);
     </script>
 </body>
 </html>

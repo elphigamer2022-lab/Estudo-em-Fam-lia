@@ -169,8 +169,8 @@
         <div class="msg-system">Suas mensagens são visíveis para todos.</div>
     </div>
 
-    <div id="audioPreviewContainer" style="display:none; padding: 10px; background: #252525; border-top: 1px solid #444; align-items: center; gap: 10px;">
-        <audio id="audioPreviewPlayer" controls style="height: 30px; flex: 1;"></audio>
+    <div id="audioPreviewContainer" style="display:none;">
+    <audio id="audioPreviewPlayer" controls></audio>
         <span onclick="cancelAudioRecording()" style="cursor:pointer; color:#ea4335; font-weight:bold; padding: 5px;">✕</span>
     </div>
 
@@ -195,7 +195,7 @@
             <div class="control-item-wrapper" style="position: relative; display: flex; align-items: center; gap: 5px;">
                 <span id="recordingTimer" style="position: absolute; top: -25px; left: 50%; transform: translateX(-50%); font-size: 11px; color: #ea4335; font-weight: bold; display: none;">00:00</span>
                 
-                <span id="voiceBtn" 
+                <span id="voiceBtn" onclick="toggleVoiceRecording()">🎤</span>
       style="cursor:pointer; font-size: 18px; color: #5f6368;" 
       onclick="toggleVoiceRecording()" 
       title="Clique para gravar / Clique para parar">🎤</span>
@@ -268,4 +268,5 @@
     <script src="script.js"></script>
    <div id="waitingRoomPanel" style="position: fixed; top: 20px; right: 20px; z-index: 10000; display: flex; flex-direction: column; gap: 10px;"></div> 
 </body>
+
 </html>

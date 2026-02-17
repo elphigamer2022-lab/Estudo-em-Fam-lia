@@ -1305,7 +1305,18 @@ function stopAudioRecording() {
     if (mediaRecorder && isRecording) {
         mediaRecorder.stop();
         isRecording = false;
-        mediaRecorder.stream.getTracks().forEach(t => t.stop());
+
+        // O SEGREDO: Só muda o estilo se o elemento realmente existir
+        const voiceBtn = document.getElementById('voiceBtn');
+        if (voiceBtn) {
+            voiceBtn.style.color = "#5f6368";
+            voiceBtn.innerHTML = "🎤"; 
+        }
+
+        // Para as faixas do microfone (apaga a luzinha do navegador)
+        if (mediaRecorder.stream) {
+            mediaRecorder.stream.getTracks().forEach(t => t.stop());
+        }
     }
 }
 function showAudioPreview(url) {
@@ -1622,4 +1633,5 @@ function showAudioPreview() {
         `;
     }
 }
+
 

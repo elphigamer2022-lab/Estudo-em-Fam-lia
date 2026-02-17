@@ -1,0 +1,1089 @@
+/* ============================================================
+   ESTILOS GERAIS E RESET
+   ============================================================ */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    background-color: #1a1a1a;
+    color: white;
+    height: 100vh;
+    width: 100vw;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+/* ============================================================
+   NAVBAR (COMPARTILHADA ENTRE HOME E LOGIN)
+   ============================================================ */
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 50px;
+    background-color: #252525;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+    z-index: 100;
+}
+
+.logo {
+    font-size: 24px;
+    font-weight: bold;
+    color: #0e71eb;
+}
+
+.logo span {
+    font-size: 12px;
+    color: #888;
+    vertical-align: super;
+}
+
+.btn-primary {
+    background-color: #0e71eb;
+    color: white;
+    border: none;
+    padding: 10px 25px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+.btn-primary:hover {
+    background-color: #0c59ba;
+}
+
+/* ============================================================
+   PÁGINA INICIAL (INDEX.HTML) - CENTRALIZAÇÃO TOTAL
+   ============================================================ */
+.hero {
+    flex-grow: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    background-color: #1a1a1a;
+}
+
+.hero-content h1 {
+    font-size: 3.5rem;
+    margin-bottom: 20px;
+    font-weight: 700;
+}
+
+.hero-content p {
+    color: #ccc;
+    font-size: 1.2rem;
+}
+
+/* ============================================================
+   PAINEL DE OPÇÕES (LOGIN.HTML) - CENTRALIZAÇÃO TOTAL
+   ============================================================ */
+.container-options {
+    flex-grow: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #1a1a1a;
+}
+
+.options-card {
+    background-color: #252525;
+    padding: 50px;
+    border-radius: 25px;
+    text-align: center;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.6);
+    width: 100%;
+    max-width: 550px;
+}
+
+.options-card h2 {
+    font-size: 2rem;
+    margin-bottom: 10px;
+}
+
+.options-card p {
+    color: #aaa;
+    margin-bottom: 30px;
+}
+
+.grid-options {
+    display: flex;
+    flex-direction: row;
+    gap: 25px;
+    justify-content: center;
+}
+
+.opt-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 180px;
+    height: 180px;
+    border: none;
+    border-radius: 24px;
+    cursor: pointer;
+    font-weight: bold;
+    color: white;
+    transition: transform 0.2s ease, filter 0.2s ease;
+}
+
+.opt-btn.start {
+    background-color: #ff742e; /* Laranja Zoom */
+}
+
+.opt-btn.join {
+    background-color: #0e71eb; /* Azul Zoom */
+}
+
+.opt-btn:hover {
+    transform: scale(1.05);
+    filter: brightness(1.1);
+}
+
+.opt-btn .icon {
+    font-size: 50px;
+    margin-bottom: 15px;
+}
+
+/* ============================================================
+   SALA DE REUNIÃO (SALA.HTML)
+   ============================================================ */
+.meeting-body {
+    background-color: #000;
+    display: flex;
+    height: 100vh;
+    width: 100vw;
+    overflow: hidden;
+}
+
+.main-screen {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    background-color: #000;
+    position: relative;
+}
+
+/* BARRA SUPERIOR */
+.top-bar {
+    height: 45px;
+    background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 20px;
+    position: absolute;
+    top: 0;
+    width: 100%;
+    z-index: 50;
+}
+
+.top-left {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.encryption-icon {
+    color: #2ecc71;
+    font-size: 14px;
+}
+
+.meeting-timer {
+    font-size: 13px;
+    color: #ffffff;
+    font-family: 'Courier New', Courier, monospace;
+}
+
+/* GRADE DE VÍDEOS DINÂMICA (20 TELAS) */
+.video-grid {
+    flex-grow: 1;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    grid-auto-rows: min-content;
+    gap: 12px;
+    padding: 60px 20px 20px 20px;
+    overflow-y: auto;
+    align-content: center;
+    justify-items: center;
+}
+
+.video-grid::-webkit-scrollbar {
+    width: 6px;
+}
+
+.video-grid::-webkit-scrollbar-thumb {
+    background: #333;
+    border-radius: 10px;
+}
+
+.video-container {
+    position: relative;
+    background-color: #1a1a1a;
+    border-radius: 12px;
+    overflow: hidden;
+    aspect-ratio: 16/9;
+    width: 100%;
+    max-width: 480px;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+}
+
+#localVideo {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    position: relative;
+    z-index: 2;
+    transition: opacity 0.3s ease;
+}
+
+.video-placeholder {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-color: #2c2c2c;
+    z-index: 1;
+}
+
+.user-icon {
+    font-size: 60px;
+    color: #444;
+}
+
+.user-label {
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+    background: rgba(0,0,0,0.7);
+    padding: 4px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    z-index: 3;
+    color: white;
+}
+
+/* ============================================================
+   BARRA DE CONTROLES (CORREÇÃO DE ALINHAMENTO)
+   ============================================================ */
+.controls-bar {
+    height: 90px;
+    background: #1a1a1a;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 30px;
+    border-top: 1px solid #333;
+    z-index: 100;
+    width: 100%;
+    position: relative;
+}
+
+.controls-group.left { flex: 1; justify-content: flex-start; gap: 15px; display: flex; }
+.controls-group.center { flex: 2; justify-content: center; gap: 10px; display: flex; }
+.controls-group.right { flex: 1; justify-content: flex-end; display: flex; }
+
+.control-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 70px;
+    cursor: pointer;
+}
+
+.control-item-wrapper {
+    display: flex;
+    align-items: flex-start;
+    margin: 0 6px;
+}
+
+.control-item:hover {
+    opacity: 0.8;
+}
+
+.control-item span {
+    font-size: 11px;
+    color: #ffffff;
+    margin-top: 6px;
+    white-space: nowrap;
+}
+
+.control-btn {
+    background: transparent;
+    border: none;
+    color: white;
+    font-size: 24px;
+    cursor: pointer;
+}
+
+.arrow-btn {
+    background: transparent;
+    border: none;
+    color: #666;
+    font-size: 9px;
+    cursor: pointer;
+    padding-top: 12px;
+}
+
+.arrow-btn:hover {
+    color: #fff;
+}
+
+.btn-leave {
+    background-color: #333;
+    color: #FF2D55;
+    border: none;
+    padding: 10px 22px;
+    border-radius: 10px;
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 15px;
+    transition: background 0.2s, color 0.2s;
+    white-space: nowrap;
+}
+
+.btn-leave:hover {
+    background-color: #FF2D55;
+    color: white;
+}
+
+/* ============================================================
+   CHAT E COMPONENTES AUXILIARES
+   ============================================================ */
+.chat-sidebar {
+    position: fixed;
+    right: 0;
+    top: 0;
+    bottom: 90px;
+    width: 350px;
+    background: #ffffff;
+    display: none;
+    flex-direction: column;
+    z-index: 2000;
+    box-shadow: -5px 0 15px rgba(0,0,0,0.3);
+}
+
+.chat-sidebar.active {
+    display: flex !important;
+}
+
+.chat-header {
+    padding: 20px;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: bold;
+    font-size: 16px;
+}
+
+.chat-messages {
+    flex-grow: 1;
+    padding: 20px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    background-color: #f7f9fb;
+}
+
+.msg-bubble {
+    background: #0e71eb;
+    color: white;
+    padding: 12px 16px;
+    border-radius: 18px 18px 0 18px;
+    margin-bottom: 15px;
+    align-self: flex-end;
+    max-width: 85%;
+    font-size: 14px;
+    box-shadow: 0 4px 10px rgba(14, 113, 235, 0.2);
+}
+
+.chat-input-area {
+    position: relative; /* Essencial para os popups ficarem presos aqui */
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px;
+    background: white;
+}
+
+.chat-input-area input[type="text"] {
+    flex: 1;
+    min-width: 0;
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 20px;
+    outline: none;
+}
+
+.chat-input-area button {
+    white-space: nowrap;
+    padding: 8px 15px;
+    background: #0e71eb;
+    color: white;
+    border: none;
+    border-radius: 20px;
+    font-weight: bold;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+/* DROPDOWNS E MENUS */
+.dropdown-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+    height: 100%;
+}
+
+.dropdown-menu {
+    display: none;
+    position: absolute;
+    bottom: 85px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #242424;
+    border: 1px solid #444;
+    border-radius: 8px;
+    min-width: 260px;
+    z-index: 9999;
+    padding: 8px 0;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+    text-align: left;
+}
+
+.dropdown-menu.show {
+    display: block;
+}
+
+.menu-section { padding: 8px 15px; font-size: 11px; color: #888; text-transform: uppercase; font-weight: bold; }
+.menu-item { padding: 8px 15px 8px 35px; font-size: 13px; color: #eee; cursor: pointer; position: relative; }
+.menu-item:hover { background-color: #0e71eb; }
+.menu-item.checked::before { content: "✓"; position: absolute; left: 12px; color: #2ecc71; }
+.menu-divider { height: 1px; background-color: #444; margin: 8px 0; }
+.red-text { color: #ff4d4d !important; font-weight: bold; }
+
+/* NOTIFICAÇÃO CHAT */
+.chat-badge {
+    position: absolute;
+    top: -2px;
+    right: 18px;
+    background-color: #ff2d55;
+    color: white;
+    font-size: 11px;
+    font-weight: bold;
+    min-width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    pointer-events: none;
+}
+
+.msg-system {
+    background: rgba(0, 0, 0, 0.05);
+    color: #666;
+    font-size: 12px;
+    padding: 8px;
+    border-radius: 5px;
+    margin-bottom: 15px;
+    text-align: center;
+    width: 100%;
+}
+
+.chat-sidebar-footer {
+    padding: 10px;
+    border-top: 1px solid #eee;
+    background: white;
+}
+
+.chat-destination {
+    font-size: 11px;
+    color: #666;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.chat-destination select {
+    border: none;
+    background: #f0f0f0;
+    border-radius: 4px;
+    font-size: 11px;
+    padding: 2px 5px;
+    cursor: pointer;
+}
+
+/* Ajusta o popup de emojis para aparecer acima do botão */
+.emoji-popup {
+    display: none;
+    position: absolute;
+    bottom: 50px; /* Sobe o menu para cima do input */
+    right: 10px;  /* Alinha à direita, perto do botão enviar */
+    background: white;
+    border: 1px solid #ddd;
+    padding: 10px;
+    border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    z-index: 3000;
+    gap: 10px;
+}
+
+.emoji-popup.show {
+    display: flex;
+}
+/* Ajusta o menu de configurações da engrenagem */
+#chatSettingsMenu {
+    display: none;
+    position: absolute;
+    right: 10px;
+    top: 50px; /* Ajuste conforme a altura do seu header de chat */
+    background: #242424;
+    border: 1px solid #444;
+    z-index: 3001;
+}
+
+#chatSettingsMenu.show {
+    display: block;
+}
+.msg-reply-context {
+    background: rgba(0, 0, 0, 0.1);
+    border-left: 3px solid #fff;
+    padding: 5px 8px;
+    margin-bottom: 5px;
+    font-size: 11px;
+    border-radius: 4px;
+    font-style: italic;
+}
+
+.reply-btn {
+    font-size: 10px;
+    cursor: pointer;
+    opacity: 0.6;
+    margin-left: 10px;
+}
+
+.reply-preview-bar {
+    display: none;
+    background: #f0f0f0;
+    padding: 5px 15px;
+    font-size: 12px;
+    border-left: 4px solid #0e71eb;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* REAÇÕES */
+.reactions-menu { min-width: 280px; padding: 15px; }
+.emoji-row { display: flex; justify-content: space-around; font-size: 24px; }
+.emoji-row span { cursor: pointer; transition: transform 0.2s; padding: 5px; }
+.emoji-row span:hover { transform: scale(1.4); }
+
+.hand-badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: #f1c40f;
+    font-size: 20px;
+    width: 35px;
+    height: 35px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+    z-index: 10;
+}
+.auth-box, .options-box {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 30px;
+    border-radius: 15px;
+    margin-top: 30px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    max-width: 450px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.main-input {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 15px;
+    background: #222;
+    border: 1px solid #444;
+    border-radius: 8px;
+    color: white;
+}
+
+.small-text {
+    font-size: 11px;
+    color: #666;
+    margin-top: 10px;
+}
+
+.btn-logout {
+    margin-top: 20px;
+    background: transparent;
+    border: none;
+    color: #f44336;
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+.grid-options {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+}
+/* Badge de Propaganda na Index */
+.unlimited-badge {
+    display: inline-block;
+    background: rgba(46, 204, 113, 0.2);
+    color: #2ecc71;
+    padding: 8px 16px;
+    border-radius: 50px;
+    font-size: 14px;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border: 1px solid #2ecc71;
+    margin-bottom: 20px;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.05); opacity: 0.8; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+/* Ajuste do Título e Hero */
+.hero-content h1 {
+    font-size: 3rem;
+    max-width: 800px;
+    margin: 0 auto 20px;
+}
+
+.hero-content p {
+    max-width: 600px;
+    margin: 0 auto 30px;
+    line-height: 1.6;
+}
+
+/* Estilo do temporizador na sala para reforçar o marketing */
+.meeting-timer::after {
+    content: " • SEM LIMITE";
+    color: #2ecc71;
+    font-weight: bold;
+    margin-left: 8px;
+}
+
+/* Fundo escurecido e desfocado */
+.modal-overlay {
+    display: none; 
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(8px); /* Efeito profissional de desfoque */
+    z-index: 9999;
+    justify-content: center;
+    align-items: center;
+    animation: fadeIn 0.3s ease;
+}
+
+/* Cartão do Modal */
+.modal-content {
+    background: #252525;
+    padding: 30px;
+    border-radius: 24px;
+    width: 90%;
+    max-width: 400px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+    transform: scale(0.9);
+    animation: scaleUp 0.3s forwards;
+}
+
+.modal-header h3 { font-size: 20px; color: #fff; margin-bottom: 5px; }
+
+.modal-input {
+    width: 100%;
+    padding: 15px;
+    background: #1a1a1a;
+    border: 2px solid #333;
+    border-radius: 12px;
+    color: #fff;
+    font-size: 16px;
+    margin: 20px 0;
+    transition: border-color 0.3s;
+}
+
+.modal-input:focus {
+    border-color: #0e71eb;
+    outline: none;
+}
+
+.btn-link {
+    background: none;
+    border: none;
+    color: #888;
+    cursor: pointer;
+    margin-top: 15px;
+    text-decoration: underline;
+}
+
+/* Animações */
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes scaleUp { from { transform: scale(0.9); } to { transform: scale(1); } }
+.settings-card { max-width: 500px; }
+.settings-tabs { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 10px; }
+.tab-btn { background: none; border: none; color: #888; padding: 10px; cursor: pointer; font-weight: bold; }
+.tab-btn.active { color: #0e71eb; border-bottom: 2px solid #0e71eb; }
+.settings-pane { color: #eee; min-height: 200px; }
+.setting-row { margin-bottom: 15px; }
+.setting-row label { display: block; font-size: 12px; color: #aaa; margin-bottom: 5px; }
+
+.video-preview-container {
+    background: #000;
+    height: 180px;
+    border-radius: 12px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #333;
+}
+
+#settingsVideoPreview {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+/* Ajuste para o menu de segurança não crescer desordenadamente */
+#securityDropdown {
+    bottom: 85px; /* Mantém acima da barra de controles */
+    max-height: 400px;
+    overflow-y: auto;
+    width: 280px;
+}
+
+/* Scrollbar fina para o menu se necessário */
+#securityDropdown::-webkit-scrollbar {
+    width: 4px;
+}
+#securityDropdown::-webkit-scrollbar-thumb {
+    background: #444;
+    border-radius: 10px;
+}
+.video-container.local .video-label:hover {
+    background: rgba(14, 113, 235, 0.8); /* Cor azul do Zoom ao passar o mouse */
+    color: white;
+}
+#localPlayer .user-label:hover {
+    background: #0e71eb !important;
+    transition: 0.2s;
+}
+/* Remove o comportamento de "quadradinhos" e vira "Cinema" */
+.video-grid.screen-share-active {
+    display: flex !important;
+    flex-direction: column;
+    padding: 45px 0 0 0 !important; /* Cola no topo e laterais */
+    gap: 0;
+    overflow: hidden;
+}
+
+/* A TELA OCUPA TUDO */
+#screenShareContainer.screen-share-content {
+    flex: 1; 
+    width: 100vw;
+    height: 100%;
+    max-width: none !important;
+    border-radius: 0; /* Tira as bordas arredondadas para parecer nativo */
+    background: #000;
+}
+
+#screenShareVideo {
+    width: 100%;
+    height: 100%;
+    object-fit: contain; /* Mostra a tela sem cortes */
+}
+
+/* SUA CÂMERA FICA PEQUENA EMBAIXO (OU EM CIMA) */
+.video-grid.screen-share-active .video-container:not(#screenShareContainer) {
+    position: absolute;
+    bottom: 100px; /* Flutua acima dos controles */
+    right: 20px;
+    width: 200px; /* Tamanho de miniatura estilo Zoom */
+    height: 112px;
+    z-index: 100;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+    border: 1px solid #444;
+}
+
+/* Se quiser que as câmeras fiquem em uma linha horizontal embaixo da tela */
+.video-grid.screen-share-active {
+    display: grid;
+    grid-template-rows: 1fr auto; /* Tela em cima, câmeras em baixo */
+    grid-template-columns: 1fr;
+}
+
+.video-grid.screen-share-active #screenShareContainer {
+    grid-row: 1;
+}
+
+.video-grid.screen-share-active .video-container:not(#screenShareContainer) {
+    grid-row: 2;
+    display: inline-block; /* Alinha participantes um do lado do outro */
+}
+@keyframes slideIn {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+/* Efeito de pulso para o botão de gravação */
+.recording-active {
+    color: #ea4335 !important;
+    animation: pulse-red 1.5s infinite;
+}
+
+@keyframes pulse-red {
+    0% { opacity: 1; }
+    50% { opacity: 0.4; }
+    100% { opacity: 1; }
+}
+/* Remove visualmente todos os controles nativos do áudio */
+audio::-webkit-media-controls-panel,
+audio::-webkit-media-controls-play-button,
+audio::-webkit-media-controls-current-time-display,
+audio::-webkit-media-controls-time-remaining-display,
+audio::-webkit-media-controls-timeline,
+audio::-webkit-media-controls-mute-button,
+audio::-webkit-media-controls-volume-slider,
+audio::-webkit-media-controls-enclosure {
+    display: none !important;
+}
+
+/* Deixa o container do áudio invisível mas funcional */
+#audioPreviewPlayer, .msg-audio {
+    display: none !important;
+}
+
+/* Se você quiser que apareça apenas um pequeno ícone de 'Áudio Pronto' no lugar da barra */
+#audioPreviewContainer {
+    background: #f0f4f8;
+    border-radius: 10px;
+    padding: 5px 15px;
+    display: none; /* Ativado pelo JS */
+    align-items: center;
+    justify-content: space-between;
+    height: 40px;
+}
+
+#audioPreviewContainer::before {
+    content: "🎵 Áudio pronto para envio...";
+    font-size: 12px;
+    color: #555;
+}
+/* Ajuste para acomodar 3 botões no painel */
+.options-card {
+    max-width: 700px; /* Aumentamos um pouco a largura máxima do card */
+}
+
+.grid-options {
+    flex-wrap: wrap; /* Permite que os botões quebrem a linha em telas menores */
+    gap: 15px;
+}
+
+.opt-btn {
+    width: 160px; /* Reduzi levemente a largura para caberem os três lado a lado */
+    height: 160px;
+}
+/* Ajuste para os 3 botões do painel */
+.grid-options {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); /* Cria 3 colunas iguais */
+    gap: 15px;
+    width: 100%;
+    max-width: 600px;
+}
+
+.opt-btn {
+    width: 100% !important; /* Faz o botão ocupar a coluna do grid */
+    height: 150px !important;
+}
+
+/* Ajuste do botão de enviar do chat para não parecer um botão padrão cinza */
+.btn-send-chat {
+    background: #0e71eb;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-weight: bold;
+}
+.modal-overlay {
+    display: none; /* Padrão fechado */
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease;
+    pointer-events: auto; /* Permite cliques quando visível */
+}
+
+/* Quando o JS mudar para display: flex, ativamos a visibilidade */
+.modal-overlay[style*="display: flex"] {
+    opacity: 1;
+    visibility: visible;
+}
+/* Força o chat a ser uma barra lateral direita */
+.chat-sidebar {
+    position: fixed;
+    right: 0;
+    top: 0;
+    bottom: 90px; /* Acima da barra de controles */
+    width: 350px;
+    background: white;
+    display: none; /* Ativado pelo JS */
+    flex-direction: column;
+    z-index: 1000;
+    box-shadow: -2px 0 10px rgba(0,0,0,0.1);
+}
+
+/* Container do Input */
+.chat-input-area {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px;
+    position: relative;
+}
+
+/* Posicionamento dos Popups (Emoji e Engrenagem) */
+.emoji-wrapper, .voice-wrapper { position: relative; display: flex; align-items: center; }
+
+.emoji-popup {
+    display: none;
+    position: absolute;
+    bottom: 45px; /* Sobe para cima do botão */
+    right: 0;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 10px;
+    box-shadow: 0 -5px 15px rgba(0,0,0,0.1);
+    z-index: 2000;
+    flex-wrap: wrap;
+    width: 150px;
+}
+
+.chat-settings-dropdown {
+    top: 50px; /* Abaixo da engrenagem */
+    right: 10px;
+    left: auto;
+    bottom: auto;
+    transform: none;
+}
+
+/* Botão Enviar Azul como na Imagem */
+.btn-send-blue {
+    background: #0e71eb;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 20px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+/* Timer Fantasma */
+.ghost-timer {
+    position: absolute;
+    top: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 10px;
+    color: #ea4335;
+    font-weight: bold;
+    display: none;
+}
+.dropdown-menu {
+    display: none; /* Padrão escondido */
+    pointer-events: none;
+}
+
+.dropdown-menu.show {
+    display: block !important;
+    pointer-events: auto; /* Reativa o clique apenas quando visível */
+}
+/* Estilização do Player de Áudio no Chat */
+audio {
+    height: 35px;
+    width: 100%;
+    max-width: 220px;
+    border-radius: 20px;
+    filter: sepia(20%) saturate(70%) grayscale(1) contrast(90%) invert(85%); /* Deixa o player mais escuro/moderno */
+    margin-top: 8px;
+}
+
+.msg-bubble audio {
+    outline: none;
+}
+
+/* Container do Preview antes de enviar */
+#audioPreviewContainer {
+    background: #252525 !important;
+    border-radius: 10px;
+    margin: 5px;
+    border: 1px solid #444;
+    padding: 8px !important;
+}
+/* Ajuste para o player de áudio no chat */
+.msg-bubble audio {
+    display: block;
+    margin-top: 5px;
+    filter: invert(0); /* Garante que as cores não fiquem invertidas */
+    max-width: 200px;
+}
+
+#audioPreviewContainer {
+    display: none;
+    align-items: center;
+    background: #f1f3f4;
+    padding: 10px;
+    border-radius: 8px;
+    margin-bottom: 5px;
+    gap: 10px;
+}
+/* Força o player de áudio a ser visível */
+audio {
+    display: block !important;
+    min-width: 200px !important;
+    height: 38px !important;
+    outline: none;
+}
+
+#audioPreviewContainer {
+    background: #202124 !important;
+    border-top: 1px solid #444;
+    padding: 10px !important;
+    display: none; /* controlado pelo JS */
+    align-items: center;
+    gap: 10px;
+}

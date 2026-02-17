@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adoração Em Família - Painel</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<div id="idModal" class="modal-overlay" onclick="closeModalOnOverlay(event)">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Entrar em uma Reunião</h3>
+            <span class="close-modal" onclick="closeIDModal()">&times;</span>
+        </div>
+        <div class="modal-body">
+            <p>Digite o ID da reunião para conectar-se instantaneamente.</p>
+            <input type="text" id="meetingIDInput" placeholder="Ex: 123-456-789" class="modal-input">
+        </div>
+        <div class="modal-footer">
+            <button class="btn-primary full-width" onclick="joinByID()">Entrar agora</button>
+            <button class="btn-link" onclick="closeIDModal()">Cancelar</button>
+        </div>
+    </div>
+</div>
+<body>
+    <nav class="navbar">
+        <div class="logo">Adoração Em Família</div>
+    </nav>
+
+    <main class="container-options">
+        <div class="options-card">
+            <h2>Bem-vindo ao Painel</h2>
+            <p>O que você deseja fazer agora?</p>
+            <div class="grid-options">
+    <button class="opt-btn start" onclick="window.location.href='sala.html'">
+        <span class="icon">🎥</span> Nova Reunião
+    </button>
+    
+    <button class="opt-btn custom" onclick="openCustomModal()" style="background-color: #8e44ad;">
+        <span class="icon">⚙️</span> Personalizar Sala
+    </button>
+
+    <button class="opt-btn join" onclick="openIDModal()">
+        <span class="icon">➕</span> Entrar com ID
+    </button>
+</div>
+    </main>
+    <div id="customRoomModal" class="modal-overlay" onclick="closeCustomModalOnOverlay(event)">
+    <div class="modal-content" style="max-width: 500px; max-height: 90vh; overflow-y: auto;">
+        <div class="modal-header">
+            <h3>Criar Sala Personalizada</h3>
+            <span class="close-modal" onclick="closeCustomModal()">&times;</span>
+        </div>
+        <div class="modal-body">
+            <label class="small-text">Nome da Instituição (Substitui o Logo)</label>
+            <input type="text" id="customLogoName" class="modal-input" placeholder="Ex: Escola Adventista">
+
+            <label class="small-text">Tipo de Instituição</label>
+            <select id="instType" class="modal-input">
+                <option value="religiao">Religião</option>
+                <option value="educacao">Educação</option>
+                <option value="palestra">Palestra</option>
+                <option value="teatro">Teatro</option>
+                <option value="discurso">Discurso</option>
+                <option value="conversa">Conversa Dinâmica</option>
+                <option value="outro">Outro</option>
+            </select>
+
+            <label class="small-text">Tema do Evento (Topo Centralizado)</label>
+            <input type="text" id="eventTheme" class="modal-input" placeholder="Ex: Reunião de Pais">
+
+            <label class="small-text">Duração da Reunião</label>
+            <select id="meetingDuration" class="modal-input">
+                <option value="unlimited">Ilimitado</option>
+                <option value="30">30 Minutos</option>
+                <option value="60">1 Hora</option>
+                <option value="120">2 Horas</option>
+            </select>
+
+            <label class="small-text">Cor de Destaque da Sala</label>
+            <input type="color" id="roomColor" class="modal-input" value="#0e71eb" style="height: 50px; padding: 5px;">
+
+            <label class="small-text">Tipo de Entrada</label>
+            <div style="display: flex; gap: 20px; margin: 10px 0;">
+                <label style="color: #eee;"><input type="radio" name="entryType" value="id" checked> Apenas ID</label>
+                <label style="color: #eee;"><input type="radio" name="entryType" value="invite"> Por Convite</label>
+            </div>
+
+            <div id="supportSection">
+                <label class="small-text">Equipe de Suporte</label>
+                <div id="supportList"></div>
+                <button class="btn-primary" style="background: #2ecc71; font-size: 12px; padding: 5px 10px; margin-top: 10px;" onclick="addSupportField()">+ Adicionar Suporte</button>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-primary full-width" onclick="startCustomMeeting()">Criar Agora</button>
+        </div>
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adoração Em Família - Sala</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="meeting-body">
+
+    <header class="top-bar">
+        <div class="top-left">
+            <span class="encryption-icon">🛡️</span>
+            <span class="meeting-timer">00:00</span>
+        </div>
+</div>
+    </header>
+
+    <div class="main-screen">
+        <div class="video-grid" id="videoGrid">
+            <div class="video-container" id="localPlayer">
+                <video id="localVideo" autoplay playsinline muted></video>
+                <div class="video-placeholder">
+                    <span class="user-icon">👤</span>
+                </div>
+                <div class="user-label">Você (Host)</div>
+            </div>
+            </div>
+<footer class="controls-bar">
+    <div class="controls-group left">
+        <div class="control-item-wrapper">
+            <div class="control-item">
+                <button class="control-btn" id="audioBtn" onclick="toggleAudio()">🎙️</button>
+                <span>Desativar Som</span>
+            </div>
+            <div class="dropdown-container">
+                <button class="arrow-btn" onclick="toggleAudioMenu(event)">^</button>
+                <div id="audioDropdown" class="dropdown-menu">
+                    <div class="menu-section">Selecione o Microfone</div>
+                    <div id="micList" class="menu-list">
+                    </div>
+                    <div class="menu-divider"></div>
+                    <div class="menu-section">Selecione o Alto-falante</div>
+                    <div id="speakerList"></div>
+                    <div class="menu-divider"></div>
+                    <div class="menu-item" onclick="testAudioDevices()">Testar Alto-falante e Microfone...</div>
+                    <div class="menu-item">Mudar para Áudio do Telefone...</div>
+                    <div class="menu-item" onclick="disconnectAudio()">Desconectar Áudio do Computador</div>
+                    <div class="menu-divider"></div>
+                    <div class="menu-item" onclick="openSettingsModal('audio')">Configurações de Áudio...</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="control-item-wrapper">
+            <div class="control-item">
+                <button class="control-btn" id="videoBtn" onclick="toggleVideo()">📹</button>
+                <span>Interromper Vídeo</span>
+            </div>
+            <div class="dropdown-container">
+                <button class="arrow-btn" onclick="toggleVideoMenu(event)">^</button>
+                <div id="videoDropdown" class="dropdown-menu">
+                    <div class="menu-section">Selecione a Câmera</div>
+                    <div id="cameraList"></div>
+                    <div class="menu-divider"></div>
+                    <div class="menu-item" onclick="openSettingsModal('video')">Escolher Plano de Fundo Virtual...</div>
+                    <div class="menu-item" onclick="openSettingsModal('video')">Escolher Filtro de Vídeo...</div>
+                    <div class="menu-divider"></div>
+                    <div class="menu-item" onclick="openSettingsModal('video')">Configurações de Vídeo...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="controls-group center">
+        <div class="control-item" onclick="toggleSecurityMenu(event)">
+    <button class="control-btn">🛡️</button>
+    <span>Segurança</span>
+    <div id="securityDropdown" class="dropdown-menu">
+        <div class="menu-section">Bloquear Reunião</div>
+        <div class="menu-item" id="optLockMeeting" onclick="toggleSecuritySetting('lock')">Bloquear Reunião</div>
+        <div class="menu-item checked" id="optWaitingRoom" onclick="toggleSecuritySetting('waiting')">Ativar Sala de Espera</div>
+        
+        <div class="menu-divider"></div>
+        <div class="menu-section">Permitir que participantes:</div>
+        <div class="menu-item checked" id="optAllowShare" onclick="toggleSecuritySetting('share')">Compartilhar Tela</div>
+        <div class="menu-item checked" id="optAllowChat" onclick="toggleSecuritySetting('chat')">Chat</div>
+        <div class="menu-item checked" id="optAllowRename" onclick="toggleSecuritySetting('rename')">Renomear a si mesmos</div>
+        <div class="menu-item checked" id="optAllowUnmute" onclick="toggleSecuritySetting('unmute')">Ativar som sozinhos</div>
+        <div class="menu-item checked" id="optAllowVideo" onclick="toggleSecuritySetting('startVideo')">Iniciar Vídeo</div>
+    </div>
+</div>
+
+        <div class="control-item" onclick="toggleParticipantsMenu(event)">
+    <button class="control-btn">👥</button>
+    <span>Participantes</span>
+    <div id="participantsDropdown" class="dropdown-menu">
+        <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 15px; border-bottom: 1px solid #444;">
+            <span class="menu-section" style="padding: 0;">Participantes</span>
+            <span onclick="toggleParticipantActions(event)" style="cursor: pointer; font-size: 14px;">⚙️</span>
+        </div>
+        
+        <div id="participantActionsMenu" class="dropdown-menu" style="bottom: auto; top: 40px; right: 10px; min-width: 180px; display: none;">
+            <div class="menu-item" onclick="handleParticipantAction('remove')">Remover Participante</div>
+            <div class="menu-item" onclick="handleParticipantAction('block')" style="color: #ea4335;">Bloquear Participante</div>
+        </div>
+
+        <div id="activeParticipantsList">
+            <div class="menu-item">Você (Host)</div>
+        </div>
+
+        <div class="menu-divider"></div>
+        <div style="padding: 10px;">
+            <button class="btn-primary" style="width: 100%; font-size: 12px;" onclick="copyMeetingLink()">Copiar Link</button>
+        </div>
+    </div>
+</div>
+
+        <div class="control-item" onclick="toggleChat()">
+            <div id="chatNotification" class="chat-badge" style="display: none;">0</div> 
+            <button class="control-btn">💬</button>
+            <span>Chat</span>
+        </div>
+
+        <div class="control-item" onclick="toggleScreenShare()">
+            <button class="control-btn" id="shareBtn" style="color: #2D8CFF;">🖥️</button>
+            <span id="shareLabel">Compartilhar Tela</span>
+        </div>
+
+        <div class="control-item" onclick="toggleReactionsMenu(event)">
+            <button class="control-btn">😀</button>
+            <span>Reações</span>
+            <div id="reactionsDropdown" class="dropdown-menu reactions-menu">
+                <div class="emoji-row">
+                    <span onclick="sendReaction('✋')">✋</span>
+                    <span onclick="sendReaction('👏')">👏</span>
+                    <span onclick="sendReaction('👍')">👍</span>
+                    <span onclick="sendReaction('❤️')">❤️</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="controls-group right">
+        <button class="btn-leave" onclick="window.location.href='login.html'">Encerrar</button>
+    </div>
+</footer>
+    </div>
+
+    <aside class="chat-sidebar" id="chatSidebar">
+    <div class="chat-header">
+        <span>Chat da Reunião</span>
+        <div style="display: flex; gap: 10px; align-items: center;">
+            <span style="cursor:pointer; font-size: 16px;" onclick="toggleChatSettings(event)">⚙️</span>
+            <button onclick="toggleChat()" style="background:none; border:none; color:#eee; cursor:pointer; font-size:18px;">✕</button>
+        </div>
+        
+        <div id="chatSettingsMenu" class="dropdown-menu chat-settings-dropdown">
+            <div class="menu-section">O participante pode:</div>
+            <div class="menu-item checked" id="allowChatAll" onclick="toggleChatRestriction('all')">Falar com todos</div>
+            <div class="menu-item" id="allowChatHost" onclick="toggleChatRestriction('host')">Apenas Anfitrião</div>
+            <div class="menu-item" id="allowChatNone" onclick="toggleChatRestriction('none')">Bloquear Chat</div>
+            <div class="menu-divider"></div>
+            <div class="menu-item red-text" onclick="clearChat()">Limpar Chat</div>
+        </div>
+    </div>
+
+    <div class="chat-messages" id="chatMessages">
+        <div class="msg-system">Suas mensagens são visíveis para todos.</div>
+    </div>
+
+    <div id="audioPreviewContainer" style="display:none; padding: 10px; background: #252525; border-top: 1px solid #444; align-items: center; gap: 10px;">
+        <audio id="audioPreviewPlayer" controls style="height: 30px; flex: 1;"></audio>
+        <span onclick="cancelAudioRecording()" style="cursor:pointer; color:#ea4335; font-weight:bold; padding: 5px;">✕</span>
+    </div>
+
+    <div class="chat-sidebar-footer">
+        <div class="chat-destination">
+            <span>Enviar para:</span>
+            <select id="chatTarget">
+                <option value="todos">Todos</option>
+                <option value="host">Anfitrião (Privado)</option>
+            </select>
+        </div>
+
+        <div id="replyPreview" class="reply-preview-bar" style="display:none;">
+            <span id="replyText">Respondendo a...</span>
+            <span onclick="cancelReply()" style="cursor:pointer;">✕</span>
+        </div>
+
+        <div class="chat-input-area">
+            <label for="fileInput" class="icon-btn" title="Anexar Arquivo" style="cursor:pointer; font-size: 18px;">📎</label>
+            <input type="file" id="fileInput" style="display:none;">
+            
+            <div class="control-item-wrapper" style="position: relative; display: flex; align-items: center; gap: 5px;">
+                <span id="recordingTimer" style="position: absolute; top: -25px; left: 50%; transform: translateX(-50%); font-size: 11px; color: #ea4335; font-weight: bold; display: none;">00:00</span>
+                
+                <span id="voiceBtn" 
+      style="cursor:pointer; font-size: 18px; color: #5f6368;" 
+      onclick="toggleVoiceRecording()" 
+      title="Clique para gravar / Clique para parar">🎤</span>
+                
+                <div class="dropdown-container">
+                    <button class="arrow-btn" onclick="toggleChatVoiceMenu(event)" style="background:none; border:none; color:#666; cursor:pointer; font-size:10px;">^</button>
+                    <div id="chatVoiceDropdown" class="dropdown-menu chat-settings-dropdown" style="bottom: 45px; top: auto;">
+                        <div class="menu-section">Velocidade</div>
+                        <div class="menu-item" onclick="setAudioSpeed(0.5)">0.5x</div>
+                        <div class="menu-item checked" onclick="setAudioSpeed(1.0)">1.0x (Normal)</div>
+                        <div class="menu-item" onclick="setAudioSpeed(1.5)">1.5x</div>
+                        <div class="menu-item" onclick="setAudioSpeed(2.0)">2.0x</div>
+                    </div>
+                </div>
+            </div>
+            
+            <input type="text" id="chatInput" placeholder="Digite uma mensagem..." onkeypress="if(event.key === 'Enter') sendMessage()">
+
+            <div class="emoji-wrapper">
+                <span style="cursor:pointer; font-size: 18px;" onclick="toggleEmojiPicker(event)">😀</span>
+                <div id="emojiPicker" class="emoji-popup">
+                    <span onclick="insertEmoji('😀')">😀</span>
+                    <span onclick="insertEmoji('😂')">😂</span>
+                    <span onclick="insertEmoji('👍')">👍</span>
+                    <span onclick="insertEmoji('🔥')">🔥</span>
+                    <span onclick="insertEmoji('👏')">👏</span>
+                    <span onclick="insertEmoji('❤️')">❤️</span>
+                </div>
+            </div>
+            
+            <button class="btn-send-blue" onclick="sendMessage()">Enviar</button>
+        </div>
+    </div>
+</aside>
+<div id="settingsModal" class="modal-overlay" onclick="closeSettingsOnOverlay(event)">
+    <div class="modal-content settings-card">
+        <div class="modal-header">
+            <h3 id="settingsTitle">Configurações</h3>
+            <span class="close-modal" onclick="closeSettingsModal()">&times;</span>
+        </div>
+        <div class="modal-body">
+            <div class="settings-tabs">
+                <button id="tabAudio" class="tab-btn" onclick="switchSettingsTab('audio')">🎙️ Áudio</button>
+                <button id="tabVideo" class="tab-btn" onclick="switchSettingsTab('video')">📹 Vídeo</button>
+            </div>
+            <div id="settingsContent" class="settings-pane">
+                </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-primary" onclick="closeSettingsModal()">Pronto</button>
+        </div>
+    </div>
+</div>
+<div id="renameModal" class="modal-overlay" onclick="closeRenameModalOnOverlay(event)">
+    <div class="modal-content" style="max-width: 350px;">
+        <div class="modal-header">
+            <h3>Renomear</h3>
+            <span class="close-modal" onclick="closeRenameModal()">&times;</span>
+        </div>
+        <div class="modal-body">
+            <p>Introduza o seu novo nome de exibição:</p>
+            <input type="text" id="newNameInput" class="modal-input" placeholder="Seu nome...">
+        </div>
+        <div class="modal-footer">
+            <button class="btn-primary full-width" onclick="confirmRename()">Alterar Nome</button>
+        </div>
+    </div>
+</div>
+
+    <script src="script.js"></script>
+   <div id="waitingRoomPanel" style="position: fixed; top: 20px; right: 20px; z-index: 10000; display: flex; flex-direction: column; gap: 10px;"></div> 
+</body>
+</html>
